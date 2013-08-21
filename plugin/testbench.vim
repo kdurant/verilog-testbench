@@ -129,7 +129,7 @@ endfunction
 function! testbench#write_context(module_name, port_list, current_line)
     let s:current_line = a:current_line
     call setline(s:current_line, '') | let s:current_line = s:current_line + 1
-    call setline(s:current_line, '`timescale    1ns/1ps') | let s:current_line = s:current_line + 1
+    call setline(s:current_line, '`timescale    1 ns/1 ps') | let s:current_line = s:current_line + 1
     call setline(s:current_line, '') | let s:current_line = s:current_line + 1
     call setline(s:current_line, 'module ' . a:module_name . '() ') | let s:current_line = s:current_line + 1
     for line in s:port_list
@@ -171,6 +171,6 @@ function! testbench#instant_top(current_line)
         call Vlog_Inst_Gen()
         exe 'wincmd p'
         call cursor(a:current_line-2, 1)
-        exe "normal p"
+        exe "normal p" | exe "normal gg"
     endif
 endfunction
