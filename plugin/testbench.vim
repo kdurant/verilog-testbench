@@ -16,6 +16,7 @@ endfunction
 call s:check_defined('g:vimrc_email', 'email@email.com')
 call s:check_defined('g:vimrc_author', 'author')
 call s:check_defined('g:testbench_load_header',1)
+call s:check_defined('g:testbench_clk_name','clk')
 
 function! testbench#generate()
     if &filetype == 'verilog'
@@ -69,6 +70,10 @@ function! testbench#clear_unnecessary_line(start_line, end_line)
         elseif getline( s:current_line ) =~ 'inout.*;'
             call add(s:port_list, getline(s:current_line))
         endif
+
+        if getline( s:current_line ) =~ '\cinput.*clk'
+            let g:testbench_clk_name = substitute(getline(s:current_line), '\c.*\(\w*clk\w*\).*', '\1', 'g')
+        endif
         let s:current_line = s:current_line + 1
     endw
     return s:port_list
@@ -110,7 +115,7 @@ function! testbench#new_file(module_name, port_list)
     let s:module_name = a:module_name
     let s:port_list = a:port_list
     silent execute 'to '.'split ' . a:module_name . '.v'
-    exe "normal ggdG"
+    exe 'normal ggdG'
     if g:testbench_load_header == 1
         call testbench#write_file_info()
         let s:current_line = 10
@@ -118,7 +123,6 @@ function! testbench#new_file(module_name, port_list)
         let s:current_line = 0
     endif
     let s:current_line = testbench#write_context(s:module_name, s:port_list, s:current_line)
-    "call testbench#init_reg(s:current_line, s:port_list)
     let s:current_line = testbench#init_reg(s:current_line, s:port_list)
     call testbench#instant_top(s:current_line)
 endfunction
@@ -156,7 +160,8 @@ function! testbench#write_context(module_name, port_list, current_line)
     call setline(s:current_line, 'parameter     SYSCLK_PERIOD = 10 ;') | let s:current_line = s:current_line + 1
     call setline(s:current_line, '') | let s:current_line = s:current_line + 1
     call setline(s:current_line, 'always') | let s:current_line = s:current_line + 1
-    call setline(s:current_line, "\t".'#(SYSCLK_PERIOD/2)   Clk = ~Clk ;') | let s:current_line = s:current_line + 1
+    "call setline(s:current_line, "\t".'#(SYSCLK_PERIOD/2)   Clk = ~Clk ;') | let s:current_line = s:current_line + 1
+    call setline(s:current_line, "\t".'#(SYSCLK_PERIOD/2)   ' . g:testbench_clk_name .' =~ ' . g:testbench_clk_name . ' ;') | let s:current_line = s:current_line + 1
     call setline(s:current_line, '') | let s:current_line = s:current_line + 1
     return s:current_line
 endfunction
@@ -183,11 +188,13 @@ endfunction
 function! testbench#instant_top(current_line)
     if exists('g:vlog_inst_gen_mode')
         let g:vlog_inst_gen_mode = 1 
+        let g:check_port_declaration = 0
         exe 'wincmd p'
         call Vlog_Inst_Gen()
         exe 'wincmd p'
         call cursor(a:current_line-2, 1)
         exe "normal p" | exe "normal gg"
         let g:vlog_inst_gen_mode = 0 
+        let g:check_port_declaration = 1
     endif
 endfunction
