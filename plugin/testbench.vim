@@ -188,5 +188,6 @@ function! testbench#instant_top(current_line)
         exe 'wincmd p'
         call cursor(a:current_line-2, 1)
         exe "normal p" | exe "normal gg"
+        let g:vlog_inst_gen_mode = 0 
     endif
 endfunction
