@@ -1,5 +1,6 @@
 # AutoTestbench  
-  
+A very simple plugin to auto generate verilog testbench file. I hope you like it.
+
 # Feature  
 * Auto generate a testbench about current file  
 * Don't support declaration like below:  
@@ -7,11 +8,11 @@
     intput      a ,  
                 b ;  
 ```
-    But support declaration like below:  
+* But support declaration like below:  
 ```verilog
     intput      a ,  b ;  
 ```
-* This plugin don't check your syntax whether is correct. You should 
+* This plugin don't check your syntax whether is corrected. You should 
 invoke compiler to do it before use this plugin.
 
 # Usage
@@ -40,12 +41,15 @@ Also you can define other maps to invoke it.
     \# ChangeLog   :  
     \=============================================================================*/  
   
-    default g:testbench_load_header is 1  
-* If you set g:testbench_load_header is 1, you should set these variables  
+    default:  
+    g:testbench_load_header is 1  
+* If you g:testbench_load_header is 1, you should set these variables:  
     let g:vimrc_author='your name'    
     let g:vimrc_email='your email'    
 
-    default g:vimrc_author is 'author', g:vimrc_email is 'email@email.com'
+    default:  
+    g:vimrc_author is 'author'  
+    g:vimrc_email is 'email@email.com'  
 
 # Contributions
-Contributions, issue and pull requests are welcome
+Contributions, issue and pull requests are welcome  
