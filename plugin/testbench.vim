@@ -29,7 +29,7 @@ function! testbench#generate()
             endif
         endif
     else
-        echo 'Current filetype is not verilog!'
+        echohl ErrorMsg | echo 'Current filetype is not verilog!' | echohl none
     endif
 endfunction
 
