@@ -46,7 +46,11 @@ function! testbench#find_module_name(start_line, end_line)
     let s:current_line = a:start_line
     while s:current_line <= a:end_line
         if getline(s:current_line) =~ 'module'
-            let s:module_name = substitute(getline(s:current_line),'module\|#\|(\|\s\+', '', 'g')
+            if getline(s:current_line) =~ ';'
+                let s:module_name = substitute(getline(s:current_line),'(.*\|module\|\s\+', '', 'g')
+            else
+                let s:module_name = substitute(getline(s:current_line),'module\|#\|(\|\s\+', '', 'g')
+            endif
             break
         endif
         let s:current_line = s:current_line + 1
