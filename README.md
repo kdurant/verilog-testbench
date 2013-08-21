@@ -3,23 +3,30 @@
 # Feature  
 
 * Auto generate a testbench about current file  
-* Don't support declaration like below  
+* Don't support declaration like below:  
+```verilog
     intput      a ,  
-    b ;  
+                b ;  
+```
+    But support declaration like below:  
+```verilog
+    intput      a ,  b ;  
+```
+* This plugin don't check your syntax whether is correct. You should 
+invoke compiler to do it before use this plugin.
 
 # Usage
-This plugin is very easy to easy.  
-* Run ,tb to generate a testbench and will display it in current window.  
+This plugin is very easy to use.  
+* Run ,tb (or Testbench in command line) to generate a testbench and will display it in current window.  
 Also you can define other maps to invoke it.  
 
 # Installation  
 
 * recommend install [vlog_inst_gen](https://github.com/vim-scripts/vlog_inst_gen)  
-    If you install this plugin, it will auto instance top file in testbench.
-
+    If you install this plugin, it will auto instance current file in testbench.
   
 * Clone the plugin into a separate directory:  
-  
+
     $ cd ~/vimfiles/bundle    
     $ git clone https://github.com/kdurant/verilog-testbench.git  verilog-testbench    
 
