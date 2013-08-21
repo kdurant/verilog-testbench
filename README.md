@@ -3,12 +3,12 @@ A very simple plugin to auto generate verilog testbench file. I hope you like it
 
 # Feature  
 * Auto generate a testbench about current file  
-* Don't support declaration like below:  
+* Don't support port declaration like below:  
 ```verilog
     intput      a ,  
-                b ;  
+    b ;  
 ```
-* But support declaration like below:  
+* But support port declaration like below:  
 ```verilog
     intput      a ,  b ;  
 ```
