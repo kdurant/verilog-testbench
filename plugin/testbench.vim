@@ -20,8 +20,7 @@ function! testbench#generate()
     let s:port_list = testbench#clear_unnecessary_keyword(s:port_list)
     let s:port_list = testbench#replace_keyword(s:port_list)
     call testbench#new_file(s:module_name, s:port_list)
-    "echo s:module_name
-    "echo s:port_list
+
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -103,7 +102,9 @@ function! testbench#new_file(module_name, port_list)
         let s:current_line = 0
     endif
     let s:current_line = testbench#write_context(s:module_name, s:port_list, s:current_line)
-    call testbench#init_reg(s:current_line, s:port_list)
+    "call testbench#init_reg(s:current_line, s:port_list)
+    let s:current_line = testbench#init_reg(s:current_line, s:port_list)
+    call testbench#instant_top(s:current_line)
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -111,13 +112,13 @@ endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! testbench#write_file_info()
     call setline(1, '/*=============================================================================')
-    call setline(2, '# FileName    :    ' . expand('%'))
-    call setline(3, '# Author      :    ' . g:vimrc_author)
-    call setline(4, '# Email       :	' . g:vimrc_email)
-    call setline(5, '# Description :    ')
+    call setline(2, '# FileName    : ' . expand('%'))
+    call setline(3, '# Author      : ' . g:vimrc_author)
+    call setline(4, '# Email       : ' . g:vimrc_email)
+    call setline(5, '# Description : ')
     call setline(6, '# Version     : V1.0')
-    call setline(7, '# LastChange  :	' . strftime("%Y-%m-%d"))
-    call setline(8, '# ChangeLog   :	')
+    call setline(7, '# LastChange  : ' . strftime("%Y-%m-%d"))
+    call setline(8, '# ChangeLog   : ')
     call setline(9, '=============================================================================*/')
 endfunction
 
@@ -160,4 +161,16 @@ function! testbench#init_reg(current_line, port_list)
     call setline(s:current_line, 'end') | let s:current_line = s:current_line + 1
     call setline(s:current_line, '') | let s:current_line = s:current_line + 1
     call setline(s:current_line, 'endmodule') | let s:current_line = s:current_line + 1
+    return s:current_line
+endfunction
+
+function! testbench#instant_top(current_line)
+    if exists('g:vlog_inst_gen_mode')
+        let g:vlog_inst_gen_mode = 1 
+        exe 'wincmd p'
+        call Vlog_Inst_Gen()
+        exe 'wincmd p'
+        call cursor(a:current_line-2, 1)
+        exe "normal p"
+    endif
 endfunction
