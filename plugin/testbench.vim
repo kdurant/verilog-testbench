@@ -110,6 +110,7 @@ function! testbench#new_file(module_name, port_list)
     let s:module_name = a:module_name
     let s:port_list = a:port_list
     silent execute 'to '.'split ' . a:module_name . '.v'
+    exe "normal ggdG"
     if g:testbench_load_header == 1
         call testbench#write_file_info()
         let s:current_line = 10
