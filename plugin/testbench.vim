@@ -13,19 +13,23 @@ call s:check_defined('g:vimrc_author', 'author')
 call s:check_defined('g:testbench_load_header',1)
 
 function! testbench#generate()
-    let s:module_name = ''
-    let s:module_name = testbench#find_module_name(1, line('$'))
-    let s:port_list=[]
-    let s:port_list = testbench#clear_unnecessary_line(1, line('$'))
-    let s:port_list = testbench#clear_unnecessary_keyword(s:port_list)
-    let s:port_list = testbench#replace_keyword(s:port_list)
-    if findfile(s:module_name.'.v') == ''
-        call testbench#new_file(s:module_name, s:port_list)
-    else
-        let s:choice = confirm("Rewrite existed Testbench?", "&Yes\n&No")
-        if s:choice == 1
+    if &filetype == 'verilog'
+        let s:module_name = ''
+        let s:module_name = testbench#find_module_name(1, line('$'))
+        let s:port_list=[]
+        let s:port_list = testbench#clear_unnecessary_line(1, line('$'))
+        let s:port_list = testbench#clear_unnecessary_keyword(s:port_list)
+        let s:port_list = testbench#replace_keyword(s:port_list)
+        if findfile(s:module_name.'.v') == ''
             call testbench#new_file(s:module_name, s:port_list)
+        else
+            let s:choice = confirm("Rewrite existed Testbench?", "&Yes\n&No")
+            if s:choice == 1
+                call testbench#new_file(s:module_name, s:port_list)
+            endif
         endif
+    else
+        echo 'Current filetype is not verilog!'
     endif
 endfunction
 
