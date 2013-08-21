@@ -2,6 +2,16 @@
 nmap    ,tb    <esc>:TestBench<cr>
 command! -nargs=0 TestBench call testbench#generate()
 
+function! s:check_defined(variable, default)
+  if !exists(a:variable)
+    let {a:variable} = a:default
+  endif
+endfunction
+
+call s:check_defined('g:vimrc_email', 'email@email.com')
+call s:check_defined('g:vimrc_author', 'author')
+call s:check_defined('g:testbench_load_header',1)
+
 function! testbench#generate()
     let s:module_name = ''
     let s:module_name = testbench#find_module_name(1, line('$'))
@@ -86,8 +96,13 @@ function! testbench#new_file(module_name, port_list)
     let s:module_name = a:module_name
     let s:port_list = a:port_list
     silent execute 'to '.'split ' . a:module_name . '.v'
-    call testbench#write_file_info()
-    let s:current_line = testbench#write_context(s:module_name, s:port_list)
+    if g:testbench_load_header == 1
+        call testbench#write_file_info()
+        let s:current_line = 10
+    else
+        let s:current_line = 0
+    endif
+    let s:current_line = testbench#write_context(s:module_name, s:port_list, s:current_line)
     call testbench#init_reg(s:current_line, s:port_list)
 endfunction
 
@@ -110,8 +125,8 @@ endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "write port infomation and initial system clock
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! testbench#write_context(module_name, port_list)
-    let s:current_line = 10
+function! testbench#write_context(module_name, port_list, current_line)
+    let s:current_line = a:current_line
     call setline(s:current_line, '') | let s:current_line = s:current_line + 1
     call setline(s:current_line, '`timescale    1ns/1ps') | let s:current_line = s:current_line + 1
     call setline(s:current_line, '') | let s:current_line = s:current_line + 1
