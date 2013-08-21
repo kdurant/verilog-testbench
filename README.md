@@ -17,7 +17,7 @@ invoke compiler to do it before use this plugin.
 
 # Usage
 This plugin is very easy to use.  
-* Run ,tb (or Testbench in command line) to generate a testbench and will display it in current window.  
+* Run ,tb (or :Testbench in command line) to generate a testbench and will display it in current window.  
 Also you can define other maps to invoke it.  
 
 # Installation  

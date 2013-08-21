@@ -20,10 +20,11 @@ call s:check_defined('g:testbench_clk_name','clk')
 
 function! testbench#generate()
     if &filetype == 'verilog'
-        let s:module_name = ''
+        "let s:module_name = ''
         let s:module_name = testbench#find_module_name(1, line('$'))
-        let s:port_list=[]
+        "let s:port_list=[]
         let s:port_list = testbench#clear_unnecessary_line(1, line('$'))
+        let s:port_list = testbench#clear_delete_comment(s:port_list)
         let s:port_list = testbench#clear_unnecessary_keyword(s:port_list)
         let s:port_list = testbench#replace_keyword(s:port_list)
         if findfile(s:module_name.'.v') == ''
@@ -79,8 +80,17 @@ function! testbench#clear_unnecessary_line(start_line, end_line)
     return s:port_list
 endfunction
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" "delete comment at the end of line
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"delete unnecessary keyword. eg. wire, reg signed
+function! testbench#clear_delete_comment(port_list)
+    let s:port_list = []
+    for s:line in a:port_list
+        call add(s:port_list, substitute(s:line, ';.*', ';', ''))
+    endfor
+    return s:port_list
+endfunction
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" "delete unnecessary keyword. eg. wire, reg signed
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! testbench#clear_unnecessary_keyword(port_list)
     let s:port_list = []
