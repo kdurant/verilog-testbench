@@ -1,4 +1,6 @@
 
+nmap    ,tb    <esc>:TestBench<cr>
+command! -nargs=0 TestBench call testbench#generate()
 
 function! testbench#generate()
     let s:module_name = ''
@@ -7,6 +9,7 @@ function! testbench#generate()
     let s:port_list = testbench#clear_unnecessary_line(1, line('$'))
     let s:port_list = testbench#clear_unnecessary_keyword(s:port_list)
     let s:port_list = testbench#replace_keyword(s:port_list)
+    call testbench#new_file(s:module_name, s:port_list)
     "echo s:module_name
     "echo s:port_list
 endfunction
@@ -74,4 +77,72 @@ function! testbench#replace_keyword(port_list)
         endif
     endfor
     return s:port_list
+endfunction
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"open new window
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! testbench#new_file(module_name, port_list)
+    let s:module_name = a:module_name
+    let s:port_list = a:port_list
+    silent execute 'to '.'split ' . a:module_name . '.v'
+    call testbench#write_file_info()
+    let s:current_line = testbench#write_context(s:module_name, s:port_list)
+    call testbench#init_reg(s:current_line, s:port_list)
+endfunction
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"set file header
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! testbench#write_file_info()
+    call setline(1, '/*=============================================================================')
+    call setline(2, '# FileName    :    ' . expand('%'))
+    call setline(3, '# Author      :    ' . g:vimrc_author)
+    call setline(4, '# Email       :	' . g:vimrc_email)
+    call setline(5, '# Description :    ')
+    call setline(6, '# Version     : V1.0')
+    call setline(7, '# LastChange  :	' . strftime("%Y-%m-%d"))
+    call setline(8, '# ChangeLog   :	')
+    call setline(9, '=============================================================================*/')
+endfunction
+
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"write port infomation and initial system clock
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! testbench#write_context(module_name, port_list)
+    let s:current_line = 10
+    call setline(s:current_line, '') | let s:current_line = s:current_line + 1
+    call setline(s:current_line, '`timescale    1ns/1ps') | let s:current_line = s:current_line + 1
+    call setline(s:current_line, '') | let s:current_line = s:current_line + 1
+    call setline(s:current_line, 'module ' . a:module_name . '() ') | let s:current_line = s:current_line + 1
+    for line in s:port_list
+        call setline(s:current_line, line)
+        let s:current_line = s:current_line + 1 
+    endfor
+    call setline(s:current_line, '') | let s:current_line = s:current_line + 1
+    call setline(s:current_line, 'parameter     SYSCLK_PERIOD = 10 ;') | let s:current_line = s:current_line + 1
+    call setline(s:current_line, '') | let s:current_line = s:current_line + 1
+    call setline(s:current_line, 'always') | let s:current_line = s:current_line + 1
+    call setline(s:current_line, "\t".'#(SYSCLK_PERIOD/2)   Clk = ~Clk ;') | let s:current_line = s:current_line + 1
+    call setline(s:current_line, '') | let s:current_line = s:current_line + 1
+    return s:current_line
+endfunction
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"initial reg variables
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! testbench#init_reg(current_line, port_list)
+    let s:current_line = a:current_line
+    call setline(s:current_line, 'initial') | let s:current_line = s:current_line + 1
+    call setline(s:current_line, 'begin') | let s:current_line = s:current_line + 1
+    for line in a:port_list
+        if line =~ 'reg'
+            call setline(s:current_line, "\t" . substitute(line, 'reg\|\[.*\]\|;\|\s\+', '', 'g') . "\t" . '= 0 ;')
+            let s:current_line = s:current_line + 1 
+        endif
+    endfor
+    call setline(s:current_line, 'end') | let s:current_line = s:current_line + 1
+    call setline(s:current_line, '') | let s:current_line = s:current_line + 1
+    call setline(s:current_line, 'endmodule') | let s:current_line = s:current_line + 1
 endfunction
