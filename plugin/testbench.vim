@@ -1,3 +1,8 @@
+" MIT license. Copyright (c) 2013 
+if &cp || v:version < 702 || (exists('g:loaded_verilog_testbench') && g:loaded_verilog_testbench)
+  finish
+endif
+let g:loaded_verilog_testbench = 1
 
 nmap    ,tb    <esc>:TestBench<cr>
 command! -nargs=0 TestBench call testbench#generate()
