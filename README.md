@@ -1,7 +1,6 @@
 # AutoTestbench  
   
 # Feature  
-
 * Auto generate a testbench about current file  
 * Don't support declaration like below:  
 ```verilog
@@ -21,7 +20,6 @@ This plugin is very easy to use.
 Also you can define other maps to invoke it.  
 
 # Installation  
-
 * recommend install [vlog_inst_gen](https://github.com/vim-scripts/vlog_inst_gen)  
     If you install this plugin, it will auto instance current file in testbench.
   
@@ -31,7 +29,6 @@ Also you can define other maps to invoke it.
     $ git clone https://github.com/kdurant/verilog-testbench.git  verilog-testbench    
 
 # Configuration  
-  
 * Set this to 1 to load file header like below:  
     /\*=============================================================================  
     \# FileName    : SPImasterTb.v  
@@ -51,4 +48,4 @@ Also you can define other maps to invoke it.
     default g:vimrc_author is 'author', g:vimrc_email is 'email@email.com'
 
 # Contributions
-    Contributions, issue and pull requests are welcome
+Contributions, issue and pull requests are welcome
