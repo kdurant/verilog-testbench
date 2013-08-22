@@ -67,7 +67,10 @@ function! testbench#delete_not_port_line(start_line, end_line)
         let s:line_context = getline(s:current_line)
         if s:line_context =~ '^\s*\(\<input\>\|\<output\>\|\<inout\>\)\+.*'
             if s:line_context !~ '[;,]'
-                call add(s:port_list, substitute(s:line_context, '\s*\(//.*\|/\*.*\)', ',', 'g'))
+                "call add(s:port_list, substitute(s:line_context, '\s*\(//.*\|/\*.*\)', ',', 'g'))
+                call add(s:port_list, substitute( 
+                            \ substitute(s:line_context, '\s*\(//.*\|/\*.*\)', ',', 'g'),
+                            \ '$', ',', 'g') )
             else
                 call add(s:port_list, s:line_context)
             endif
