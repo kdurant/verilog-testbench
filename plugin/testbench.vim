@@ -23,7 +23,7 @@ function! testbench#generate()
         "let s:module_name = ''
         let s:module_name = testbench#find_module_name(1, line('$'))
         "let s:port_list=[]
-        let s:port_list = testbench#clear_unnecessary_line(1, line('$'))
+        let s:port_list = testbench#delete_not_port_line(1, line('$'))
         let s:port_list = testbench#clear_delete_comment(s:port_list)
         let s:port_list = testbench#clear_unnecessary_keyword(s:port_list)
         let s:port_list = testbench#replace_keyword(s:port_list)
@@ -58,18 +58,20 @@ function! testbench#find_module_name(start_line, end_line)
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"delete unnecessary line
+"delete line that not is port declaration
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! testbench#clear_unnecessary_line(start_line, end_line)
+function! testbench#delete_not_port_line(start_line, end_line)
     let s:current_line = a:start_line
     let s:port_list = []
     while s:current_line <= a:end_line
-        if getline( s:current_line ) =~ 'input.*;'
-            call add(s:port_list, getline(s:current_line))
-        elseif getline( s:current_line ) =~ 'output.*;'
-            call add(s:port_list, getline(s:current_line))
-        elseif getline( s:current_line ) =~ 'inout.*;'
-            call add(s:port_list, getline(s:current_line))
+        let s:line_context = getline(s:current_line)
+        if s:line_context =~ '^\s*\(\<input\>\|\<output\>\|\<inout\>\)\+.*'
+            echo s:line_context
+            if s:line_context !~ '[;,]'
+                call add(s:port_list, substitute(s:line_context, '\s*\(//.*\|/\*.*\)', ',', 'g'))
+            else
+                call add(s:port_list, s:line_context)
+            endif
         endif
 
         if getline( s:current_line ) =~ '\cinput.*clk'
@@ -80,17 +82,19 @@ function! testbench#clear_unnecessary_line(start_line, end_line)
     return s:port_list
 endfunction
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" "delete comment at the end of line
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
+"delete comment at the end of line
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! testbench#clear_delete_comment(port_list)
     let s:port_list = []
     for s:line in a:port_list
-        call add(s:port_list, substitute(s:line, ';.*', ';', ''))
+        call add(s:port_list, substitute(s:line, ';.*\|,.*', ';', ''))
     endfor
     return s:port_list
 endfunction
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" "delete unnecessary keyword. eg. wire, reg signed
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
+"delete unnecessary keyword. eg. wire, reg signed. This is for verilog-2001 syntax
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! testbench#clear_unnecessary_keyword(port_list)
     let s:port_list = []
@@ -113,6 +117,8 @@ function! testbench#replace_keyword(port_list)
             call add(s:port_list, substitute(s:line, 'input', 'reg', 'g'))
         elseif s:line =~ 'output'
             call add(s:port_list, substitute(s:line, 'output', 'wire', 'g'))
+        elseif s:line =~ 'inout'
+            call add(s:port_list, substitute(s:line, 'inout', 'reg', 'g'))
         endif
     endfor
     return s:port_list
