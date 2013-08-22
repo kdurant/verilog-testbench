@@ -4,24 +4,22 @@ A very simple plugin to auto generate verilog testbench file. I hope you like it
 # Feature  
 * Auto generate a testbench about current file  
 * Don't support port declaration like below:  
-```verilog
-    intput      a ,  
-    b ;  
-```
+>intput      a ,  
+>b ;  
+
 * But support port declaration like below:  
-```verilog
-    intput      a ,  b ;  
-```
-* This plugin don't check your syntax whether is corrected. You should 
+>intput      a ,  b ;  
+
+* This plugin **don't check your syntax** whether is corrected. You should 
 invoke compiler to do it before use this plugin.
 
 # Usage
 This plugin is very easy to use.  
-* Run ,tb (or :Testbench in command line) to generate a testbench and will display it in current window.  
+* Run **,tb** (or **:Testbench** in command line) to generate a testbench and will display it in current window.  
 Also you can define other maps to invoke it.  
 
 # Installation  
-* recommend install [vlog_inst_gen](https://github.com/vim-scripts/vlog_inst_gen)  
+* **Recommend install** [vlog_inst_gen](https://github.com/vim-scripts/vlog_inst_gen)  
     If you install this plugin, it will auto instance current file in testbench.
   
 * Clone the plugin into a separate directory:  
