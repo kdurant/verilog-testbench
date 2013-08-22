@@ -3,11 +3,8 @@ A very simple plugin to auto generate verilog testbench file. I hope you like it
 
 # Feature  
 * Auto generate a testbench about current file  
-* **Don't support port declaration like below:**  
->intput      a ,  
->b ;  
 
-* But support port declaration like below:  
+* Dont support port declaration like below:  
 >intput      a ,  b ;  
 
 * This plugin **don't check your syntax** whether is corrected. You should 
