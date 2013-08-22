@@ -20,11 +20,12 @@ call s:check_defined('g:testbench_clk_name','clk')
 
 function! testbench#generate()
     if &filetype == 'verilog'
-        "let s:module_name = ''
         let s:module_name = testbench#find_module_name(1, line('$'))
-        "let s:port_list=[]
         let s:port_list = testbench#delete_not_port_line(1, line('$'))
         let s:port_list = testbench#clear_delete_comment(s:port_list)
+        let s:port_list = testbench#process_line_end(s:port_list)
+        "let s:port_list = testbench#split_comma(s:port_list)
+
         let s:port_list = testbench#clear_unnecessary_keyword(s:port_list)
         let s:port_list = testbench#replace_keyword(s:port_list)
         if findfile(s:module_name.'.v') == ''
@@ -58,7 +59,7 @@ function! testbench#find_module_name(start_line, end_line)
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"delete line that not is port declaration
+"delete line that not is port declaration, and comments
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! testbench#delete_not_port_line(start_line, end_line)
     let s:current_line = a:start_line
@@ -66,14 +67,13 @@ function! testbench#delete_not_port_line(start_line, end_line)
     while s:current_line <= a:end_line
         let s:line_context = getline(s:current_line)
         if s:line_context =~ '^\s*\(\<input\>\|\<output\>\|\<inout\>\)\+.*'
-            if s:line_context !~ '[;,]'
-                "call add(s:port_list, substitute(s:line_context, '\s*\(//.*\|/\*.*\)', ',', 'g'))
-                call add(s:port_list, substitute( 
-                            \ substitute(s:line_context, '\s*\(//.*\|/\*.*\)', ',', 'g'),
-                            \ '$', ',', 'g') )
-            else
+            "if s:line_context !~ '[;,]'
+                "call add(s:port_list, substitute( 
+                            "\ substitute(s:line_context, '\s*\(//.*\|/\*.*\)', ',', 'g'),
+                            "\ '$', ';', 'g') )
+            "else
                 call add(s:port_list, s:line_context)
-            endif
+            "endif
         endif
 
         if getline( s:current_line ) =~ '\cinput.*clk'
@@ -90,11 +90,46 @@ endfunction
 function! testbench#clear_delete_comment(port_list)
     let s:port_list = []
     for s:line in a:port_list
-        call add(s:port_list, substitute(s:line, ';.*\|,.*', ';', ''))
+        if s:line =~ '^\s*\(\<input\>\|\<output\>\|\<inout\>\)\+.*'
+            call add(s:port_list, substitute(s:line, '\s*\(//.*\|/\*.*\)', '', ''))
+        endif
     endfor
     return s:port_list
 endfunction
 
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
+"substitute comma or none with semicolon
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! testbench#process_line_end(port_list)
+    let s:port_list = []
+    for s:line in a:port_list
+        if s:line =~ ';\s*$'
+            call add(s:port_list, s:line)
+        elseif s:line =~ ",$"
+            call add(s:port_list, substitute(s:line, ',$', ';', ''))
+        else
+            call add(s:port_list, substitute(s:line, '$', ';', ''))
+        endif
+    endfor
+    return s:port_list
+endfunction
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
+"substitute comma or none with semicolon
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! testbench#split_comma(port_list)
+    let s:port_list = []
+    for s:line in a:port_list
+        if s:line =~ '\(\<input\>\|\<output\>\|\<inout\>\)\s\+'
+            "echo s:line
+            "call substitute(s:line, '\s*\(\<input\>\|\<output\>\|\<reg\>\|\<wire\>\)\s*', '', 'g')
+            "call substitute(s:line, 'input', '', 'g')
+            "echo s:line
+        endif
+    endfor
+    return s:port_list
+endfunction
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
 "delete unnecessary keyword. eg. wire, reg signed. This is for verilog-2001 syntax
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
