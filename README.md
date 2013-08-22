@@ -3,7 +3,7 @@ A very simple plugin to auto generate verilog testbench file. I hope you like it
 
 # Feature  
 * Auto generate a testbench about current file  
-* Don't support port declaration like below:  
+* **Don't support port declaration like below:**  
 >intput      a ,  
 >b ;  
 
@@ -15,7 +15,7 @@ invoke compiler to do it before use this plugin.
 
 # Usage
 This plugin is very easy to use.  
-* Run **,tb** (or **:Testbench** in command line) to generate a testbench and will display it in current window.  
+* Run **,tb** (or **:TestBench** in command line) to generate a testbench and will display it in current window.  
 Also you can define other maps to invoke it.  
 
 # Installation  
