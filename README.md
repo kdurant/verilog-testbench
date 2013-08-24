@@ -4,8 +4,16 @@ A very simple plugin to auto generate verilog testbench file. I hope you like it
 # Feature  
 * Auto generate a testbench about current file  
 
-* Dont support port declaration like below:  
->intput      a ,  b ;  
+* Support verilog-2001 syntax
+
+* Support port declaration like below:  
+>intput      a, b, c ;  
+
+* **Don't support** port declaration like below:  
+>intput      a,  
+> b, c ;  
+
+
 
 * This plugin **don't check your syntax** whether is corrected. You should 
 invoke compiler to do it before use this plugin.
@@ -48,3 +56,4 @@ Also you can define other maps to invoke it.
 
 # Contributions
 Contributions, issue and pull requests are welcome  
+
