@@ -13,8 +13,6 @@ A very simple plugin to auto generate verilog testbench file. I hope you like it
 >intput      a,  
 > b, c ;  
 
-
-
 * This plugin **don't check your syntax** whether is corrected. You should 
 invoke compiler to do it before use this plugin.
 
