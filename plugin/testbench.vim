@@ -24,7 +24,7 @@ function! testbench#generate()
         let s:port_list = testbench#delete_not_port_line(1, line('$'))
         let s:port_list = testbench#clear_delete_comment(s:port_list)
         let s:port_list = testbench#process_line_end(s:port_list)
-        "let s:port_list = testbench#split_comma(s:port_list)
+        let s:port_list = testbench#split_comma(s:port_list)
 
         let s:port_list = testbench#clear_unnecessary_keyword(s:port_list)
         let s:port_list = testbench#replace_keyword(s:port_list)
@@ -67,13 +67,7 @@ function! testbench#delete_not_port_line(start_line, end_line)
     while s:current_line <= a:end_line
         let s:line_context = getline(s:current_line)
         if s:line_context =~ '^\s*\(\<input\>\|\<output\>\|\<inout\>\)\+.*'
-            "if s:line_context !~ '[;,]'
-                "call add(s:port_list, substitute( 
-                            "\ substitute(s:line_context, '\s*\(//.*\|/\*.*\)', ',', 'g'),
-                            "\ '$', ';', 'g') )
-            "else
-                call add(s:port_list, s:line_context)
-            "endif
+            call add(s:port_list, s:line_context)
         endif
 
         if getline( s:current_line ) =~ '\cinput.*clk'
@@ -116,20 +110,23 @@ function! testbench#process_line_end(port_list)
 endfunction
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
-"substitute comma or none with semicolon
+"substitute comma with 'input '
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! testbench#split_comma(port_list)
     let s:port_list = []
     for s:line in a:port_list
-        if s:line =~ '\(\<input\>\|\<output\>\|\<inout\>\)\s\+'
-            "echo s:line
-            "call substitute(s:line, '\s*\(\<input\>\|\<output\>\|\<reg\>\|\<wire\>\)\s*', '', 'g')
-            "call substitute(s:line, 'input', '', 'g')
-            "echo s:line
+        if s:line =~ ','
+            let s:line = substitute(s:line, ',', ';!input ', 'g')
+            for needle in split(s:line, '!')
+                call add(s:port_list, needle)
+            endfor
+        else
+            call add(s:port_list, s:line)
         endif
     endfor
     return s:port_list
 endfunction
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
 "delete unnecessary keyword. eg. wire, reg signed. This is for verilog-2001 syntax
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
