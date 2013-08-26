@@ -22,7 +22,7 @@ function! testbench#generate()
     if &filetype == 'verilog'
         let s:module_name = testbench#find_module_name(1, line('$'))
         let s:port_list = testbench#delete_not_port_line(1, line('$'))
-        let s:port_list = testbench#clear_delete_comment(s:port_list)
+        let s:port_list = testbench#clear_end_line_comment(s:port_list)
         let s:port_list = testbench#process_line_end(s:port_list)
         let s:port_list = testbench#split_comma(s:port_list)
 
@@ -48,7 +48,7 @@ function! testbench#find_module_name(start_line, end_line)
     let s:module_name = ''
     let s:current_line = a:start_line
     while s:current_line <= a:end_line
-        if getline(s:current_line) =~ 'module'
+        if getline(s:current_line) =~ '\Cmodule'
             let s:module_name = substitute(getline(s:current_line),'module\s\+\(\w\+\)[^0-9A-Za-z]*.*', '\1', 'g')
             break
         endif
@@ -68,6 +68,8 @@ function! testbench#delete_not_port_line(start_line, end_line)
         let s:line_context = getline(s:current_line)
         if s:line_context =~ '^\s*\(\<input\>\|\<output\>\|\<inout\>\)\+.*'
             call add(s:port_list, s:line_context)
+        elseif s:line_context =~ '\C\(\<function\>\|\<task\>\).*;'
+            break
         endif
 
         if getline( s:current_line ) =~ '\cinput.*clk'
@@ -81,7 +83,7 @@ endfunction
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
 "delete comment at the end of line
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! testbench#clear_delete_comment(port_list)
+function! testbench#clear_end_line_comment(port_list)
     let s:port_list = []
     for s:line in a:port_list
         if s:line =~ '^\s*\(\<input\>\|\<output\>\|\<inout\>\)\+.*'
