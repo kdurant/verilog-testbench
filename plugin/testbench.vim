@@ -22,9 +22,10 @@ function! testbench#generate()
     if &filetype == 'verilog'
         let s:module_name = testbench#find_module_name(1, line('$'))
         let s:port_list = testbench#delete_not_port_line(1, line('$'))
+        echo s:port_list
         let s:port_list = testbench#clear_delete_comment(s:port_list)
         let s:port_list = testbench#process_line_end(s:port_list)
-        let s:port_list = testbench#split_comma(s:port_list)
+        let s:port_list = testbench#parse_port(s:port_list)
 
         let s:port_list = testbench#clear_unnecessary_keyword(s:port_list)
         let s:port_list = testbench#replace_keyword(s:port_list)
@@ -48,7 +49,7 @@ function! testbench#find_module_name(start_line, end_line)
     let s:module_name = ''
     let s:current_line = a:start_line
     while s:current_line <= a:end_line
-        if getline(s:current_line) =~ 'module'
+        if getline(s:current_line) =~ '^\s*module'
             let s:module_name = substitute(getline(s:current_line),'module\s\+\(\w\+\)[^0-9A-Za-z]*.*', '\1', 'g')
             break
         endif
@@ -66,8 +67,9 @@ function! testbench#delete_not_port_line(start_line, end_line)
     let s:port_list = []
     while s:current_line <= a:end_line
         let s:line_context = getline(s:current_line)
-        if s:line_context =~ '^\s*\(\<input\>\|\<output\>\|\<inout\>\)\+.*'
-            call add(s:port_list, s:line_context)
+        if s:line_context =~ '\(\<input\>\|\<output\>\|\<inout\>\)\+.*[,;]'
+            "call add(s:port_list, s:line_context)
+            call add(s:port_list, matchstr(s:line_context, '\(\<input\>\|\<output\>\|\<inout\>\)\+.*[,;]'))
         endif
 
         if getline( s:current_line ) =~ '\cinput.*clk'
@@ -84,9 +86,7 @@ endfunction
 function! testbench#clear_delete_comment(port_list)
     let s:port_list = []
     for s:line in a:port_list
-        if s:line =~ '^\s*\(\<input\>\|\<output\>\|\<inout\>\)\+.*'
-            call add(s:port_list, substitute(s:line, '\s*\(//.*\|/\*.*\)', '', ''))
-        endif
+        call add(s:port_list, substitute(s:line, '\s*\(//.*\|/\*.*\)', '', ''))
     endfor
     return s:port_list
 endfunction
@@ -110,19 +110,52 @@ function! testbench#process_line_end(port_list)
 endfunction
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
-"substitute comma with 'input '
+"parse port declaration
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! testbench#split_comma(port_list)
+function! testbench#parse_port(port_list)
     let s:port_list = []
     for s:line in a:port_list
-        if s:line =~ ','
-            let s:line = substitute(s:line, ',', ';!input ', 'g')
-            for needle in split(s:line, '!')
-                call add(s:port_list, needle)
-            endfor
-        else
-            call add(s:port_list, s:line)
+        let s:port_type = ''
+        let s:port_width = ''
+        let s:port_1 = ''
+        let s:port_2 = ''
+        let s:port_3 = ''
+        let s:port_4 = ''
+        if s:line =~ '\<input\>\|\<output\>\|\<inout\>'
+            let s:port_type = '\<input\>\|\<output\>\|\<inout\>'
+            let s:port_type = matchstr(s:line, '\<input\>\|\<output\>\|\<inout\>')
+            let s:line = substitute(s:line, '\<input\>\|\<output\>\|\<inout\>\s\+', '', 'g')
         endif
+
+        if s:line =~ '\[.*:.*\]'
+            let s:port_width = matchstr(s:line, '\[.*:.*\]')
+            let s:line = substitute(s:line, '\[.*:.*\]\s\+', '', 'g')
+        endif
+        if s:line =~ ',' 
+            let s:port_1 = matchstr(s:line, '\(\w\+\)')
+            let s:line = substitute(s:line, '\w\+,', '', '')
+            call add(s:port_list, s:port_type . "\t" . s:port_width . "\t" . s:port_1)
+        endif
+        if s:line =~ ',' 
+            let s:port_2 = matchstr(s:line, '\(\w\+\)')
+            let s:line = substitute(s:line, '\w\+,', '', '')
+            call add(s:port_list, s:port_type . "\t" . s:port_width . "\t" . s:port_2)
+        endif
+        if s:line =~ ',' 
+            let s:port_3 = matchstr(s:line, '\(\w\+\)')
+            let s:line = substitute(s:line, '\w\+,', '', '')
+            call add(s:port_list, s:port_type . "\t" . s:port_width . "\t" . s:port_3)
+        endif
+        if s:line =~ ';' 
+            let s:port_4 = matchstr(s:line, '\(\w\+\)')
+            call add(s:port_list, s:port_type . "\t" . s:port_width . "\t" . s:port_4)
+        endif
+        let s:port_type = ''
+        let s:port_width = ''
+        let s:port_1 = ''
+        let s:port_2 = ''
+        let s:port_3 = ''
+        let s:port_4 = ''
     endfor
     return s:port_list
 endfunction
