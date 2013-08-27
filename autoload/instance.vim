@@ -3,7 +3,7 @@ function! instance#generate()
         let s:module_name = testbench#find_module_name(1, line('$'))
 
         let s:port_list = testbench#delete_not_port_line(1, line('$'))
-        let s:port_list = testbench#clear_end_line_comment(s:port_list)
+        let s:port_list = testbench#clear_line_comments(s:port_list)
         let s:port_list = testbench#process_line_end(s:port_list)
         let s:port_list = testbench#parse_port(s:port_list)
 
@@ -30,7 +30,6 @@ function! instance#instance(module_name, port_list)
         else
             let wangjun = wangjun . "\t." . s:line . "\t(" . s:line . "\t)" . ",\n"
         endif
-        echo s:current_number
     endfor
     let wangjun = wangjun . ") ;\n"
     let @+ = wangjun

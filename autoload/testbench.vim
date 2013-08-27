@@ -2,12 +2,11 @@ function! testbench#generate()
     if &filetype == 'verilog'
         let s:module_name = testbench#find_module_name(1, line('$'))
         let s:port_list = testbench#delete_not_port_line(1, line('$'))
-        let s:port_list = testbench#clear_end_line_comment(s:port_list)
+        let s:port_list = testbench#clear_line_comments(s:port_list)
         let s:port_list = testbench#process_line_end(s:port_list)
-        let s:port_list = testbench#parse_port(s:port_list)
-        let g:port_list = s:port_list
-
         let s:port_list = testbench#clear_unnecessary_keyword(s:port_list)
+        let s:port_list = testbench#parse_port(s:port_list)
+
         let s:port_list = testbench#replace_keyword(s:port_list)
         if findfile(s:module_name.'.v') == ''
             call testbench#new_file(s:module_name, s:port_list)
@@ -47,8 +46,10 @@ function! testbench#delete_not_port_line(start_line, end_line)
     let s:port_list = []
     while s:current_line <= a:end_line
         let s:line_context = getline(s:current_line)
-        if s:line_context =~ '\(\<input\>\|\<output\>\|\<inout\>\)\+.*'
+        if s:line_context =~ '\(\<input\>\|\<output\>\|\<inout\>\)\+.*' &&
+                    \ synIDattr(synID(s:current_line, 1, 1), "name") !~ 'comment'
             call add(s:port_list, s:line_context)
+            "echo synIDattr(synID(s:current_line, 1, 1), "name")
         elseif s:line_context =~ '\C\(\<function\>\|\<task\>\).*;'
             break
         endif
@@ -64,7 +65,7 @@ endfunction
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
 "delete comment at the end of line
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! testbench#clear_end_line_comment(port_list)
+function! testbench#clear_line_comments(port_list)
     let s:port_list = []
     for s:line in a:port_list
         call add(s:port_list, substitute(s:line, '\s*\(//.*\|/\*.*\)', '', ''))

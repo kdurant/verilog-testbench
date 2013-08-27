@@ -1,8 +1,10 @@
 # AutoTestbench  
-A very simple plugin to auto generate verilog testbench file. I hope you like it.
+A very simple plugin to generate verilog testbench file and design unit. I hope you like it.
 
 # Feature  
 * Auto generate a testbench about current file  
+
+* Auto instance current design unit  
 
 * Support verilog-2001 syntax
 
@@ -21,10 +23,9 @@ This plugin is very easy to use.
 * Run **,tb** (or **:TestBench** in command line) to generate a testbench and will display it in current window.  
 Also you can define other maps to invoke it.  
 
+* Run **,ig** (or **:Instance** in command line) to generate a instance
+
 # Installation  
-* **Recommend install** [vlog_inst_gen](https://github.com/vim-scripts/vlog_inst_gen)  
-    If you install this plugin, it will auto instance current file in testbench.
-  
 * Clone the plugin into a separate directory:  
 
     $ cd ~/vimfiles/bundle    
