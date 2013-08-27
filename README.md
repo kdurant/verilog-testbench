@@ -1,10 +1,9 @@
 # AutoTestbench  
-A very simple plugin to generate verilog testbench file and design unit. I hope you like it.
+A very simple plugin to generate verilog testbench file.  I hope you like it.
 
 # Feature  
 * Auto generate a testbench about current file  
 
-* Auto instance current design unit  
 
 * Support verilog-2001 syntax
 
@@ -22,8 +21,6 @@ invoke compiler to do it before use this plugin.
 This plugin is very easy to use.  
 * Run **,tb** (or **:TestBench** in command line) to generate a testbench and will display it in current window.  
 Also you can define other maps to invoke it.  
-
-* Run **,ig** (or **:Instance** in command line) to generate a instance
 
 # Installation  
 * Clone the plugin into a separate directory:  

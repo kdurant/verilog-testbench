@@ -26,9 +26,29 @@ function! instance#instance(module_name, port_list)
     for s:line in a:port_list
         let s:current_number = s:current_number + 1 
         if s:current_number == len(a:port_list)
-            let wangjun = wangjun . "\t." . s:line . "\t(" . s:line . "\t)" . "\n"
+            if strlen(s:line) < 4
+                let wangjun = wangjun . "\t." . s:line . "\t\t\t\t\t(\t" . s:line . "\t\t\t\t\t)" . "\n"
+            elseif strlen(s:line) < 8
+                let wangjun = wangjun . "\t." . s:line . "\t\t\t\t(\t" . s:line . "\t\t\t\t)" . "\n"
+            elseif strlen(s:line) < 12
+                let wangjun = wangjun . "\t." . s:line . "\t\t\t(\t" . s:line . "\t\t\t)" . "\n"
+            elseif strlen(s:line) < 16
+                let wangjun = wangjun . "\t." . s:line . "\t\t(\t" . s:line . "\t\t)" . "\n"
+            elseif strlen(s:line) < 20
+                let wangjun = wangjun . "\t." . s:line . "\t(\t" . s:line . "\t)" . "\n"
+            endif
         else
-            let wangjun = wangjun . "\t." . s:line . "\t(" . s:line . "\t)" . ",\n"
+            if strlen(s:line) < 4
+                let wangjun = wangjun . "\t." . s:line . "\t\t\t\t\t(\t" . s:line . "\t\t\t\t\t)" . ",\n"
+            elseif strlen(s:line) < 8
+                let wangjun = wangjun . "\t." . s:line . "\t\t\t\t(\t" . s:line . "\t\t\t\t)" . ",\n"
+            elseif strlen(s:line) < 12
+                let wangjun = wangjun . "\t." . s:line . "\t\t\t(\t" . s:line . "\t\t\t)" . ",\n"
+            elseif strlen(s:line) < 16
+                let wangjun = wangjun . "\t." . s:line . "\t\t(\t" . s:line . "\t\t)" . ",\n"
+            elseif strlen(s:line) < 20
+                let wangjun = wangjun . "\t." . s:line . "\t(\t" . s:line . "\t)" . ",\n"
+            endif
         endif
     endfor
     let wangjun = wangjun . ") ;\n"
