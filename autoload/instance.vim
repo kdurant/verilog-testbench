@@ -42,33 +42,9 @@ function! instance#instance(module_name, module_parameter, port_list)
     for s:line in a:port_list
         let s:current_number = s:current_number + 1 
         if s:current_number == len(a:port_list)
-            "if strlen(s:line) < 4
-                "let component = component . "\t." . s:line . "\t\t\t\t\t(\t" . s:line . "\t\t\t\t\t)" . "\n"
-            "elseif strlen(s:line) < 8
-                "let component = component . "\t." . s:line . "\t\t\t\t(\t" . s:line . "\t\t\t\t)" . "\n"
-            "elseif strlen(s:line) < 12
-                "let component = component . "\t." . s:line . "\t\t\t(\t" . s:line . "\t\t\t)" . "\n"
-            "elseif strlen(s:line) < 16
-                "let component = component . "\t." . s:line . "\t\t(\t" . s:line . "\t\t)" . "\n"
-            "elseif strlen(s:line) < 20
-                "let component = component . "\t." . s:line . "\t(\t" . s:line . "\t)" . "\n"
-            "else
-                let component = component . "\t." . s:line . "\t(\t" . s:line . "\t)" . "\n"
-            "endif
+            let component = component . "\t." . s:line . "\t(\t" . s:line . "\t)" . "\n"
         else
-            "if strlen(s:line) < 4
-                "let component = component . "\t." . s:line . "\t\t\t\t\t(\t" . s:line . "\t\t\t\t\t)" . ",\n"
-            "elseif strlen(s:line) < 8
-                "let component = component . "\t." . s:line . "\t\t\t\t(\t" . s:line . "\t\t\t\t)" . ",\n"
-            "elseif strlen(s:line) < 12
-                "let component = component . "\t." . s:line . "\t\t\t(\t" . s:line . "\t\t\t)" . ",\n"
-            "elseif strlen(s:line) < 16
-                "let component = component . "\t." . s:line . "\t\t(\t" . s:line . "\t\t)" . ",\n"
-            "elseif strlen(s:line) < 20
-                "let component = component . "\t." . s:line . "\t(\t" . s:line . "\t)" . ",\n"
-            "else
-                let component = component . "\t." . s:line . "\t(\t" . s:line . "\t)" . ",\n"
-            "endif
+            let component = component . "\t." . s:line . "\t(\t" . s:line . "\t)" . ",\n"
         endif
     endfor
     let component = component . ") ;\n"

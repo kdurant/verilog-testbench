@@ -104,7 +104,6 @@ function! testbench#parse_port(port_list)
         let s:port_3 = ''
         let s:port_4 = ''
         if s:line =~ '\<input\>\|\<output\>\|\<inout\>'
-            let s:port_type = '\<input\>\|\<output\>\|\<inout\>'
             let s:port_type = matchstr(s:line, '\<input\>\|\<output\>\|\<inout\>')
             let s:line = substitute(s:line, '\<input\>\|\<output\>\|\<inout\>\s\+', '', 'g')
         endif
@@ -225,7 +224,6 @@ function! testbench#write_context(module_name, port_list, current_line)
     call setline(s:current_line, 'parameter     SYSCLK_PERIOD = 10 ;') | let s:current_line = s:current_line + 1
     call setline(s:current_line, '') | let s:current_line = s:current_line + 1
     call setline(s:current_line, 'always') | let s:current_line = s:current_line + 1
-    "call setline(s:current_line, "\t".'#(SYSCLK_PERIOD/2)   Clk = ~Clk ;') | let s:current_line = s:current_line + 1
     call setline(s:current_line, "\t".'#(SYSCLK_PERIOD/2)   ' . g:testbench_clk_name .' =~ ' . g:testbench_clk_name . ' ;') | let s:current_line = s:current_line + 1
     call setline(s:current_line, '') | let s:current_line = s:current_line + 1
     return s:current_line
