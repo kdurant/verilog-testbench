@@ -1,14 +1,16 @@
 # AutoTestbench  
-A very simple plugin to generate verilog testbench file.  I hope you like it.
+A very simple plugin to generate verilog testbench file and component instance current design unit.   
+I hope you like it.
 
 # Feature  
-* Auto generate a testbench about current file  
+* Auto generate testbench about current file  
 
+* Auto generate component instance about current file
 
 * Support verilog-2001 syntax
 
-* Support port declaration like below:  
->intput      a, b, c ;  
+* Support port declaration like below(up to four):   
+>intput      a, b, c, d;  
 
 * **Don't support** port declaration like below:  
 >intput      a,  
@@ -21,6 +23,8 @@ invoke compiler to do it before use this plugin.
 This plugin is very easy to use.  
 * Run **,tb** (or **:TestBench** in command line) to generate a testbench and will display it in current window.  
 Also you can define other maps to invoke it.  
+
+* Run **,in** (or **:Instance** in command line) to generate component instance
 
 # Installation  
 * Clone the plugin into a separate directory:  
