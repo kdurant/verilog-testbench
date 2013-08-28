@@ -10,6 +10,8 @@ function! instance#generate()
 
         let s:port_list = instance#get_port_name(s:port_list)
         call instance#instance(s:module_name, s:module_parameter, s:port_list)
+    else
+        echohl ErrorMsg | echo 'Current filetype is not verilog!' | echohl none
     endif
 endfunction
 
