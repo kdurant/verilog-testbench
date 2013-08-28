@@ -251,15 +251,9 @@ function! testbench#init_reg(current_line, port_list)
 endfunction
 
 function! testbench#instant_top(current_line)
-    if exists('g:vlog_inst_gen_mode')
-        let g:vlog_inst_gen_mode = 1 
-        let g:check_port_declaration = 0
-        exe 'wincmd p'
-        call Vlog_Inst_Gen()
-        exe 'wincmd p'
-        call cursor(a:current_line-2, 1)
-        exe "normal p" | exe "normal gg"
-        let g:vlog_inst_gen_mode = 0 
-        let g:check_port_declaration = 1
-    endif
+    exe 'wincmd p'
+    silent call instance#generate()
+    exe 'wincmd p'
+    call cursor(a:current_line-2, 1)
+    exe "normal p" | exe "normal gg"
 endfunction
