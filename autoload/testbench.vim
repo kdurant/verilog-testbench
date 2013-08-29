@@ -9,7 +9,7 @@ function! testbench#generate()
         let s:port_list = testbench#parse_port(s:port_list)
 
         let s:port_list = testbench#replace_keyword(s:port_list)
-        if findfile(s:module_name.'Tb.v') == ''
+        if findfile(s:module_name . g:testbench_suffix .'.v') == ''
             call testbench#new_file(s:module_name, s:port_list)
         else
             let s:choice = confirm("Rewrite existed Testbench?", "&Yes\n&No")
@@ -178,7 +178,7 @@ endfunction
 function! testbench#new_file(module_name, port_list)
     let s:module_name = a:module_name
     let s:port_list = a:port_list
-    silent execute 'to '.'split ' . a:module_name . 'Tb.v'
+    silent execute 'to '.'split ' . a:module_name . g:testbench_suffix . '.v'
     exe 'normal ggdG'
     if g:testbench_load_header == 1
         call testbench#write_file_info()
@@ -209,7 +209,7 @@ endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! testbench#write_context(module_name, port_list)
     let g:TB = g:TB . "\n" . '`timescale  1 ns/1 ps' . "\n"
-    let g:TB = g:TB . "module\t" . a:module_name . 'Tb() ;' . "\n"
+    let g:TB = g:TB . "module\t" . a:module_name . g:testbench_suffix . '() ;' . "\n"
     for s:line in s:port_list
         let g:TB = g:TB . s:line . "\n"
     endfor
