@@ -45,14 +45,17 @@ Also you can define other maps to invoke it.
     \=============================================================================*/  
   
     default:  
-    g:testbench_load_header is 1  
+    let g:testbench_load_header = 1  
 * If you g:testbench_load_header is 1, you should set these variables:  
     let g:vimrc_author='your name'    
     let g:vimrc_email='your email'    
 
     default:  
-    g:vimrc_author is 'author'  
-    g:vimrc_email is 'email@email.com'  
+    let g:vimrc_author = 'author'  
+    let g:vimrc_email  = 'email@email.com'  
+* You can set testbench module name suffix with g:testbench_suffix
+    default:
+    let g:testbench_suffix = 'Tb'
 
 # Contributions
 Contributions, issue and pull requests are welcome  
