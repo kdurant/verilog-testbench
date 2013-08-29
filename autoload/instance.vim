@@ -1,6 +1,5 @@
 function! instance#generate()
     if &filetype == 'verilog'
-        "let s:module_name = instance#find_module_name(1, line('$'))
         let s:module_name = testbench#find_module_name(1, line('$'))
         let s:module_parameter = instance#find_module_parameter(1, line('$'))
 
@@ -26,34 +25,34 @@ endfunction
 
 function! instance#instance(module_name, module_parameter, port_list)
     if !empty(a:module_parameter)
-        let component = a:module_name . "\t#\n(\n"
+        let g:inst = a:module_name . "\t#\n(\n"
         let s:current_number = 0 
         for s:line in a:module_parameter
             let s:current_number = s:current_number + 1 
             if s:current_number == len(a:module_parameter)
-                let component = component . "\t." . matchstr(s:line, '^\w\+') . "\t\t(\t" . matchstr(s:line, '\w\+$') . "\t\t)" . "\n"
+                let g:inst = g:inst . "\t." . matchstr(s:line, '^\w\+') . "\t\t(\t" . matchstr(s:line, '\w\+$') . "\t\t)" . "\n"
             else
-                let component = component . "\t." . matchstr(s:line, '^\w\+') . "\t\t(\t" . matchstr(s:line, '\w\+$') . "\t\t)" . ",\n"
+                let g:inst = g:inst . "\t." . matchstr(s:line, '^\w\+') . "\t\t(\t" . matchstr(s:line, '\w\+$') . "\t\t)" . ",\n"
             endif
         endfor
-        let component = component . ")\n" . a:module_name . "Ex01\n(\n"
+        let g:inst = g:inst . ")\n" . a:module_name . "Ex01\n(\n"
     else
-        let component = a:module_name . "\t" . a:module_name . "Ex01\n(\n"
+        let g:inst = a:module_name . "\t" . a:module_name . "Ex01\n(\n"
     endif
 
     let s:current_number = 0 
     for s:line in a:port_list
         let s:current_number = s:current_number + 1 
         if s:current_number == len(a:port_list)
-            let component = component . "\t." . s:line . "\t(\t" . s:line . "\t)" . "\n"
+            let g:inst = g:inst . "\t." . s:line . "\t(\t" . s:line . "\t)" . "\n"
         else
-            let component = component . "\t." . s:line . "\t(\t" . s:line . "\t)" . ",\n"
+            let g:inst = g:inst . "\t." . s:line . "\t(\t" . s:line . "\t)" . ",\n"
         endif
     endfor
-    let component = component . ") ;\n"
-    let @+ = component
+    let g:inst = g:inst . ") ;\n"
+    let @+ = g:inst
     echohl Operator
-    echo component
+    echo g:inst
     echohl none
 endfunction
 
@@ -68,9 +67,7 @@ function! instance#find_module_parameter(start_line, end_line)
             let s:parameter_value = matchstr(s:line_context, '\s*parameter.*=\s*\zs\w\+\ze.*')
             call add(s:module_parameter, s:parameter_name . "\t" . s:parameter_value)
         endif
-        if s:line_context =~ ');'
-            break
-        endif
+        if s:line_context =~ ');' | break | endif
         let s:current_line = s:current_line + 1
     endwhile
     return s:module_parameter

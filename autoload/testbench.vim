@@ -1,5 +1,6 @@
 function! testbench#generate()
     if &filetype == 'verilog'
+        let g:TB = ''
         let s:module_name = testbench#find_module_name(1, line('$'))
         let s:port_list = testbench#delete_not_port_line(1, line('$'))
         let s:port_list = testbench#clear_line_comments(s:port_list)
@@ -34,7 +35,6 @@ function! testbench#find_module_name(start_line, end_line)
         endif
         let s:current_line = s:current_line + 1
     endwhile
-    "let s:module_name = s:module_name.'Tb'
     return s:module_name
 endfunction
 
@@ -182,76 +182,56 @@ function! testbench#new_file(module_name, port_list)
     exe 'normal ggdG'
     if g:testbench_load_header == 1
         call testbench#write_file_info()
-        let s:current_line = 10
-    else
-        let s:current_line = 0
     endif
-    let s:current_line = testbench#write_context(s:module_name, s:port_list, s:current_line)
-    let s:current_line = testbench#init_reg(s:current_line, s:port_list)
-    call testbench#instant_top(s:current_line)
+    call testbench#write_context(s:module_name, s:port_list)
+    call testbench#init_reg(s:port_list)
+    call testbench#instant_top()
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "set file header
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! testbench#write_file_info()
-    call setline(1, '/*=============================================================================')
-    call setline(2, '# FileName    : ' . expand('%'))
-    call setline(3, '# Author      : ' . g:vimrc_author)
-    call setline(4, '# Email       : ' . g:vimrc_email)
-    call setline(5, '# Description : ')
-    call setline(6, '# Version     : V1.0')
-    call setline(7, '# LastChange  : ' . strftime("%Y-%m-%d"))
-    call setline(8, '# ChangeLog   : ')
-    call setline(9, '=============================================================================*/')
+    let g:TB = g:TB . '/*============================================================================='."\n"
+    let g:TB = g:TB . '# FileName    : ' . expand('%')."\n"
+    let g:TB = g:TB . '# Author      : ' . g:vimrc_author ."\n"                                              
+    let g:TB = g:TB . '# Email       : ' . g:vimrc_email ."\n"                                               
+    let g:TB = g:TB . '# Description : ' ."\n"                                                               
+    let g:TB = g:TB . '# Version     : V1.0'  ."\n"                                                          
+    let g:TB = g:TB . '# LastChange  : ' . strftime("%Y-%m-%d") ."\n"                                        
+    let g:TB = g:TB . '# ChangeLog   : '  ."\n"                                                              
+    let g:TB = g:TB . '=============================================================================*/' ."\n"
 endfunction
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "write port infomation and initial system clock
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! testbench#write_context(module_name, port_list, current_line)
-    let s:current_line = a:current_line
-    call setline(s:current_line, '') | let s:current_line = s:current_line + 1
-    call setline(s:current_line, '`timescale    1 ns/1 ps') | let s:current_line = s:current_line + 1
-    call setline(s:current_line, '') | let s:current_line = s:current_line + 1
-    call setline(s:current_line, 'module ' . a:module_name . 'Tb() ;') | let s:current_line = s:current_line + 1
-    for line in s:port_list
-        call setline(s:current_line, line)
-        let s:current_line = s:current_line + 1 
+function! testbench#write_context(module_name, port_list)
+    let g:TB = g:TB . "\n" . '`timescale  1 ns/1 ps' . "\n"
+    let g:TB = g:TB . "module\t" . a:module_name . 'Tb() ;' . "\n"
+    for s:line in s:port_list
+        let g:TB = g:TB . s:line . "\n"
     endfor
-    call setline(s:current_line, '') | let s:current_line = s:current_line + 1
-    call setline(s:current_line, 'parameter     SYSCLK_PERIOD = 10 ;') | let s:current_line = s:current_line + 1
-    call setline(s:current_line, '') | let s:current_line = s:current_line + 1
-    call setline(s:current_line, 'always') | let s:current_line = s:current_line + 1
-    call setline(s:current_line, "\t".'#(SYSCLK_PERIOD/2)   ' . g:testbench_clk_name .' =~ ' . g:testbench_clk_name . ' ;') | let s:current_line = s:current_line + 1
-    call setline(s:current_line, '') | let s:current_line = s:current_line + 1
-    return s:current_line
+    let g:TB = g:TB ."\n" . "parameter     SYSCLK_PERIOD = 10 ;" . "\n\n" 
+    let g:TB = g:TB . "always\n" . "\t".'#(SYSCLK_PERIOD/2) ' . g:testbench_clk_name .' =~ ' . g:testbench_clk_name . ' ;' . "\n\n"
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "initial reg variables
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! testbench#init_reg(current_line, port_list)
-    let s:current_line = a:current_line
-    call setline(s:current_line, 'initial') | let s:current_line = s:current_line + 1
-    call setline(s:current_line, 'begin') | let s:current_line = s:current_line + 1
+function! testbench#init_reg(port_list)
+    let g:TB = g:TB . "initial\nbegin\n"
     for line in a:port_list
         if line =~ 'reg'
-            call setline(s:current_line, "\t" . substitute(line, 'reg\|\[.*\]\|;\|\s\+', '', 'g') . "\t" . '= 0 ;')
-            let s:current_line = s:current_line + 1 
+            let g:TB = g:TB . "\t" . substitute(line, 'reg\|\[.*\]\|;\|\s\+', '', 'g') . "\t" . "= 0 ;\n"
         endif
     endfor
-    call setline(s:current_line, 'end') | let s:current_line = s:current_line + 1
-    call setline(s:current_line, '') | let s:current_line = s:current_line + 1
-    call setline(s:current_line, 'endmodule') | let s:current_line = s:current_line + 1
-    return s:current_line
+    let g:TB = g:TB . "end\n" | let g:TB = g:TB . "\nendmodule" | let @t = g:TB
 endfunction
 
-function! testbench#instant_top(current_line)
-    exe 'wincmd p'
+function! testbench#instant_top()
+    exe "normal \"tP" | exe 'wincmd p'
     silent call instance#generate()
-    exe 'wincmd p'
-    call cursor(a:current_line-2, 1)
-    exe "normal p" | exe "normal gg"
+    exe 'wincmd p' | exe "normal Gkp" | exe "normal gg"
 endfunction
