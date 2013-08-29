@@ -5,7 +5,7 @@ endif
 let g:loaded_verilog_testbench = 1
 
 nmap    ,tb    <esc>:TestBench<cr>
-nmap    ,ig    <esc>:Instance<cr>
+nmap    ,in    <esc>:Instance<cr>
 command! -nargs=0 TestBench call testbench#generate()
 command! -nargs=0 Instance  call instance#generate()
 
