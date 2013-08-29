@@ -187,7 +187,6 @@ function! testbench#new_file(module_name, port_list)
         let s:current_line = 0
     endif
     let s:current_line = testbench#write_context(s:module_name, s:port_list, s:current_line)
-    echo s:port_list
     let s:current_line = testbench#init_reg(s:current_line, s:port_list)
     call testbench#instant_top(s:current_line)
 endfunction
