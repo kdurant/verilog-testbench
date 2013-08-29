@@ -1,6 +1,5 @@
 function! instance#generate()
     if &filetype == 'verilog'
-        "let s:module_name = instance#find_module_name(1, line('$'))
         let s:module_name = testbench#find_module_name(1, line('$'))
         let s:module_parameter = instance#find_module_parameter(1, line('$'))
 
@@ -68,9 +67,7 @@ function! instance#find_module_parameter(start_line, end_line)
             let s:parameter_value = matchstr(s:line_context, '\s*parameter.*=\s*\zs\w\+\ze.*')
             call add(s:module_parameter, s:parameter_name . "\t" . s:parameter_value)
         endif
-        if s:line_context =~ ');'
-            break
-        endif
+        if s:line_context =~ ');' | break | endif
         let s:current_line = s:current_line + 1
     endwhile
     return s:module_parameter

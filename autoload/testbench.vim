@@ -227,14 +227,11 @@ function! testbench#init_reg(port_list)
             let g:TB = g:TB . "\t" . substitute(line, 'reg\|\[.*\]\|;\|\s\+', '', 'g') . "\t" . "= 0 ;\n"
         endif
     endfor
-    let g:TB = g:TB . "end\n"
-    let g:TB = g:TB . "\nendmodule"
-    let @t = g:TB
+    let g:TB = g:TB . "end\n" | let g:TB = g:TB . "\nendmodule" | let @t = g:TB
 endfunction
 
 function! testbench#instant_top()
     exe "normal \"tP" | exe 'wincmd p'
     silent call instance#generate()
-    exe 'wincmd p' | exe "normal Gkp"
-    exe "normal gg"
+    exe 'wincmd p' | exe "normal Gkp" | exe "normal gg"
 endfunction
