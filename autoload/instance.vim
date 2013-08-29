@@ -24,6 +24,7 @@ function! instance#get_port_name(port_list)
 endfunction
 
 function! instance#instance(module_name, module_parameter, port_list)
+    let s:port_list = a:port_list
     if !empty(a:module_parameter)
         let g:inst = a:module_name . "\t#\n(\n"
         let s:current_number = 0 
@@ -40,12 +41,23 @@ function! instance#instance(module_name, module_parameter, port_list)
         let g:inst = a:module_name . "\t" . a:module_name . "Ex01\n(\n"
     endif
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"calc max list length
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    let s:max_length = instance#max_port_length(s:port_list)
     let s:current_number = 0 
     for s:line in a:port_list
         let s:current_number = s:current_number + 1 
-        if s:current_number == len(a:port_list)
+        if s:current_number == len(a:port_list) "last port 
+            while strwidth(s:line) < s:max_length
+                let s:line = s:line." "
+            endwhile
             let g:inst = g:inst . "\t." . s:line . "\t(\t" . s:line . "\t)" . "\n"
         else
+            let s:line_bak = s:line
+            while strwidth(s:line) < s:max_length
+                let s:line = s:line." "
+            endwhile
             let g:inst = g:inst . "\t." . s:line . "\t(\t" . s:line . "\t)" . ",\n"
         endif
     endfor
@@ -71,4 +83,20 @@ function! instance#find_module_parameter(start_line, end_line)
         let s:current_line = s:current_line + 1
     endwhile
     return s:module_parameter
+endfunction
+
+function! instance#max_port_length(port_list)
+    let s:length_old = 0
+    let s:length = 0 
+    let s:max_length = 0
+    for s:line in a:port_list
+        let s:length = strwidth(s:line)
+        if s:length > s:length_old
+            let s:max_length = s:length
+        else 
+            let s:max_length = s:max_length
+        endif
+        let s:length_old = s:max_length
+    endfor
+    return s:max_length
 endfunction
