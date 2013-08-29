@@ -8,7 +8,7 @@ function! testbench#generate()
         let s:port_list = testbench#parse_port(s:port_list)
 
         let s:port_list = testbench#replace_keyword(s:port_list)
-        if findfile(s:module_name.'.v') == ''
+        if findfile(s:module_name.'Tb.v') == ''
             call testbench#new_file(s:module_name, s:port_list)
         else
             let s:choice = confirm("Rewrite existed Testbench?", "&Yes\n&No")
@@ -34,7 +34,7 @@ function! testbench#find_module_name(start_line, end_line)
         endif
         let s:current_line = s:current_line + 1
     endwhile
-    let s:module_name = s:module_name.'Tb'
+    "let s:module_name = s:module_name.'Tb'
     return s:module_name
 endfunction
 
@@ -49,7 +49,6 @@ function! testbench#delete_not_port_line(start_line, end_line)
         if s:line_context =~ '\(\<input\>\|\<output\>\|\<inout\>\)\+.*' &&
                     \ synIDattr(synID(s:current_line, 1, 1), "name") !~ 'comment'
             call add(s:port_list, s:line_context)
-            "echo synIDattr(synID(s:current_line, 1, 1), "name")
         elseif s:line_context =~ '\C\(\<function\>\|\<task\>\).*;'
             break
         endif
@@ -103,6 +102,7 @@ function! testbench#parse_port(port_list)
         let s:port_2 = ''
         let s:port_3 = ''
         let s:port_4 = ''
+        let s:line = substitute(s:line, 'reg\|wire', '', 'g')
         if s:line =~ '\<input\>\|\<output\>\|\<inout\>'
             let s:port_type = matchstr(s:line, '\<input\>\|\<output\>\|\<inout\>')
             let s:line = substitute(s:line, '\<input\>\|\<output\>\|\<inout\>\s\+', '', 'g')
@@ -178,7 +178,7 @@ endfunction
 function! testbench#new_file(module_name, port_list)
     let s:module_name = a:module_name
     let s:port_list = a:port_list
-    silent execute 'to '.'split ' . a:module_name . '.v'
+    silent execute 'to '.'split ' . a:module_name . 'Tb.v'
     exe 'normal ggdG'
     if g:testbench_load_header == 1
         call testbench#write_file_info()
@@ -187,6 +187,7 @@ function! testbench#new_file(module_name, port_list)
         let s:current_line = 0
     endif
     let s:current_line = testbench#write_context(s:module_name, s:port_list, s:current_line)
+    echo s:port_list
     let s:current_line = testbench#init_reg(s:current_line, s:port_list)
     call testbench#instant_top(s:current_line)
 endfunction
@@ -215,7 +216,7 @@ function! testbench#write_context(module_name, port_list, current_line)
     call setline(s:current_line, '') | let s:current_line = s:current_line + 1
     call setline(s:current_line, '`timescale    1 ns/1 ps') | let s:current_line = s:current_line + 1
     call setline(s:current_line, '') | let s:current_line = s:current_line + 1
-    call setline(s:current_line, 'module ' . a:module_name . '() ;') | let s:current_line = s:current_line + 1
+    call setline(s:current_line, 'module ' . a:module_name . 'Tb() ;') | let s:current_line = s:current_line + 1
     for line in s:port_list
         call setline(s:current_line, line)
         let s:current_line = s:current_line + 1 

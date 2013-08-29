@@ -1,6 +1,7 @@
 function! instance#generate()
     if &filetype == 'verilog'
-        let s:module_name = instance#find_module_name(1, line('$'))
+        "let s:module_name = instance#find_module_name(1, line('$'))
+        let s:module_name = testbench#find_module_name(1, line('$'))
         let s:module_parameter = instance#find_module_parameter(1, line('$'))
 
         let s:port_list = testbench#delete_not_port_line(1, line('$'))
@@ -56,18 +57,18 @@ function! instance#instance(module_name, module_parameter, port_list)
     echohl none
 endfunction
 
-function! instance#find_module_name(start_line, end_line)
-    let s:module_name = ''
-    let s:current_line = a:start_line
-    while s:current_line <= a:end_line
-        if getline(s:current_line) =~ '\C^\s*module'
-            let s:module_name = substitute(getline(s:current_line),'module\s\+\(\w\+\)[^0-9A-Za-z]*.*', '\1', 'g')
-            break
-        endif
-        let s:current_line = s:current_line + 1
-    endwhile
-    return s:module_name
-endfunction
+"function! instance#find_module_name(start_line, end_line)
+    "let s:module_name = ''
+    "let s:current_line = a:start_line
+    "while s:current_line <= a:end_line
+        "if getline(s:current_line) =~ '\C^\s*module'
+            "let s:module_name = substitute(getline(s:current_line),'module\s\+\(\w\+\)[^0-9A-Za-z]*.*', '\1', 'g')
+            "break
+        "endif
+        "let s:current_line = s:current_line + 1
+    "endwhile
+    "return s:module_name
+"endfunction
 
 function! instance#find_module_parameter(start_line, end_line)
     let s:module_parameter = []
