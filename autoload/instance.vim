@@ -31,12 +31,12 @@ function! instance#instance(module_name, module_parameter, port_list)
         for line in a:module_parameter
             let current_number = current_number + 1 
             if current_number == len(a:module_parameter)
-                let g:inst = g:inst . "\t." . matchstr(line, '^\w\+') . "\t\t(\t" . matchstr(line, '\w\+$') . "\t\t)" . "\n"
+                let g:inst .= "\t." . matchstr(line, '^\w\+') . "\t\t(\t" . matchstr(line, '\w\+$') . "\t\t)" . "\n"
             else
-                let g:inst = g:inst . "\t." . matchstr(line, '^\w\+') . "\t\t(\t" . matchstr(line, '\w\+$') . "\t\t)" . ",\n"
+                let g:inst .= "\t." . matchstr(line, '^\w\+') . "\t\t(\t" . matchstr(line, '\w\+$') . "\t\t)" . ",\n"
             endif
         endfor
-        let g:inst = g:inst . ")\n" . a:module_name . "Ex01\n(\n"
+        let g:inst .= ")\n" . a:module_name . "Ex01\n(\n"
     else
         let g:inst = a:module_name . "\t" . a:module_name . "Ex01\n(\n"
     endif
@@ -52,16 +52,16 @@ function! instance#instance(module_name, module_parameter, port_list)
             while strwidth(line) < max_length
                 let line = line." "
             endwhile
-            let g:inst = g:inst . "\t." . line . "\t(\t" . line . "\t)" . "\n"
+            let g:inst .= "\t." . line . "\t(\t" . line . "\t)" . "\n"
         else
             let line_bak = line
             while strwidth(line) < max_length
                 let line = line." "
             endwhile
-            let g:inst = g:inst . "\t." . line . "\t(\t" . line . "\t)" . ",\n"
+            let g:inst .= "\t." . line . "\t(\t" . line . "\t)" . ",\n"
         endif
     endfor
-    let g:inst = g:inst . ") ;\n"
+    let g:inst .= ") ;\n"
     let @+ = g:inst
     echohl Operator
     echo g:inst

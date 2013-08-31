@@ -42,12 +42,11 @@ endfunction
 "delete line that not is port declaration, and comments
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! testbench#delete_not_port_line(start_line, end_line)
-    let current_line = a:start_line
-    let port_list = []
+    let current_line = a:start_line | let port_list = []
     while current_line <= a:end_line
         let line_context = getline(current_line)
         if line_context =~# '\(\<input\>\|\<output\>\|\<inout\>\)\+.*' &&
-                    \ synIDattr(synID(current_line, 1, 1), "name") !~ 'comment'
+                    \ synIDattr(synID(current_line, 1, 1), "name") !~? 'comment'
             call add(port_list, line_context)
         elseif line_context =~# '\(\<function\>\|\<task\>\).*;'
             break
@@ -67,7 +66,7 @@ endfunction
 function! testbench#clear_line_comments(port_list)
     let port_list = []
     for line in a:port_list
-        call add(port_list, substitute(line, '\s*\(//.*\|/\*.*\)', '', ''))
+        call add(port_list, substitute(line, '\s*\(//.*\|/\*.*\)', '', 'g'))
     endfor
     return port_list
 endfunction
@@ -148,9 +147,9 @@ function! testbench#clear_unnecessary_keyword(port_list)
     let port_list = []
     for line in a:port_list
         if line =~# 'reg'
-            call add(port_list, substitute(line, 'reg', '', ''))
+            call add(port_list, substitute(line, 'reg', '', 'g'))
         elseif line =~# 'wire'
-            call add(port_list, substitute(line, 'wire', '', ''))
+            call add(port_list, substitute(line, 'wire', '', 'g'))
         else
             call add(port_list, line)
         endif
