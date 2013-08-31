@@ -29,7 +29,7 @@ function! testbench#find_module_name(start_line, end_line)
     let module_name = ''
     let current_line = a:start_line
     while current_line <= a:end_line
-        if getline(current_line) =~ '\C^\s*module'
+        if getline(current_line) =~# '^\s*module'
             let module_name = substitute(getline(current_line),'module\s\+\(\w\+\)[^0-9A-Za-z]*.*', '\1', 'g')
             break
         endif
@@ -46,14 +46,14 @@ function! testbench#delete_not_port_line(start_line, end_line)
     let port_list = []
     while current_line <= a:end_line
         let line_context = getline(current_line)
-        if line_context =~ '\(\<input\>\|\<output\>\|\<inout\>\)\+.*' &&
+        if line_context =~# '\(\<input\>\|\<output\>\|\<inout\>\)\+.*' &&
                     \ synIDattr(synID(current_line, 1, 1), "name") !~ 'comment'
             call add(port_list, line_context)
-        elseif line_context =~ '\C\(\<function\>\|\<task\>\).*;'
+        elseif line_context =~# '\(\<function\>\|\<task\>\).*;'
             break
         endif
 
-        if getline( current_line ) =~ '\cinput.*clk'
+        if getline( current_line ) =~? 'input.*clk'
             let g:testbench_clk_name = substitute(getline(current_line), '\c.*\(\w*clk\w*\).*', '\1', 'g')
         endif
         let current_line = current_line + 1
@@ -103,7 +103,7 @@ function! testbench#parse_port(port_list)
         let port_3 = ''
         let port_4 = ''
         let line = substitute(line, 'reg\|wire', '', 'g')
-        if line =~ '\<input\>\|\<output\>\|\<inout\>'
+        if line =~# '\<input\>\|\<output\>\|\<inout\>'
             let port_type = matchstr(line, '\<input\>\|\<output\>\|\<inout\>')
             let line = substitute(line, '\<input\>\|\<output\>\|\<inout\>\s\+', '', 'g')
         endif
@@ -147,9 +147,9 @@ endfunction
 function! testbench#clear_unnecessary_keyword(port_list)
     let port_list = []
     for line in a:port_list
-        if line =~ 'reg'
+        if line =~# 'reg'
             call add(port_list, substitute(line, 'reg', '', ''))
-        elseif line =~ 'wire'
+        elseif line =~# 'wire'
             call add(port_list, substitute(line, 'wire', '', ''))
         else
             call add(port_list, line)
@@ -161,11 +161,11 @@ endfunction
 function! testbench#replace_keyword(port_list)
     let port_list = []
     for line in a:port_list
-        if line =~ 'input'
+        if line =~# 'input'
             call add(port_list, substitute(line, 'input', 'reg', 'g'))
-        elseif line =~ 'output'
+        elseif line =~# 'output'
             call add(port_list, substitute(line, 'output', 'wire', 'g'))
-        elseif line =~ 'inout'
+        elseif line =~# 'inout'
             call add(port_list, substitute(line, 'inout', 'reg', 'g'))
         endif
     endfor
@@ -223,7 +223,7 @@ endfunction
 function! testbench#init_reg(port_list)
     let g:TB .= "initial\nbegin\n"
     for line in a:port_list
-        if line =~ 'reg'
+        if line =~# 'reg'
             let g:TB .= "\t" . substitute(line, 'reg\|\[.*\]\|;\|\s\+', '', 'g') . "\t" . "= 0 ;\n"
         endif
     endfor

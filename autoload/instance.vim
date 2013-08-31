@@ -73,7 +73,7 @@ function! instance#find_module_parameter(start_line, end_line)
     let current_line = a:start_line
     while current_line <= a:end_line
         let line_context = getline(current_line) 
-        if line_context =~ '\s*parameter.*=.*'
+        if line_context =~# '\s*parameter.*=.*'
             let line_context = substitute(line_context, '\s*\(//.*\|/\*.*\)', '', 'g')
             let parameter_name = matchstr(line_context, '\s*parameter\s*\zs\w\+\ze\s*=')
             let parameter_value = matchstr(line_context, '\s*parameter.*=\s*\zs\w\+\ze.*')
