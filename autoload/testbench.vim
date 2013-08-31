@@ -192,15 +192,15 @@ endfunction
 "set file header
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! testbench#write_file_info()
-    let g:TB = g:TB . '/*============================================================================='."\n"
-    let g:TB = g:TB . '# FileName    : ' . expand('%')."\n"
-    let g:TB = g:TB . '# Author      : ' . g:vimrc_author ."\n"                                              
-    let g:TB = g:TB . '# Email       : ' . g:vimrc_email ."\n"                                               
-    let g:TB = g:TB . '# Description : ' ."\n"                                                               
-    let g:TB = g:TB . '# Version     : V1.0'  ."\n"                                                          
-    let g:TB = g:TB . '# LastChange  : ' . strftime("%Y-%m-%d") ."\n"                                        
-    let g:TB = g:TB . '# ChangeLog   : '  ."\n"                                                              
-    let g:TB = g:TB . '=============================================================================*/' ."\n"
+    let g:TB .= '/*============================================================================='."\n"
+    let g:TB .= '# FileName    : ' . expand('%')."\n"
+    let g:TB .= '# Author      : ' . g:vimrc_author ."\n"                                              
+    let g:TB .= '# Email       : ' . g:vimrc_email ."\n"                                               
+    let g:TB .= '# Description : ' ."\n"                                                               
+    let g:TB .= '# Version     : V1.0'  ."\n"                                                          
+    let g:TB .= '# LastChange  : ' . strftime("%Y-%m-%d") ."\n"                                        
+    let g:TB .= '# ChangeLog   : '  ."\n"                                                              
+    let g:TB .= '=============================================================================*/' ."\n"
 endfunction
 
 
@@ -208,26 +208,26 @@ endfunction
 "write port infomation and initial system clock
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! testbench#write_context(module_name, port_list)
-    let g:TB = g:TB . "\n" . '`timescale  1 ns/1 ps' . "\n"
-    let g:TB = g:TB . "module\t" . a:module_name . g:testbench_suffix . '() ;' . "\n"
+    let g:TB .= "\n" . '`timescale  1 ns/1 ps' . "\n"
+    let g:TB .= "module\t" . a:module_name . g:testbench_suffix . '() ;' . "\n"
     for line in a:port_list
-        let g:TB = g:TB . line . "\n"
+        let g:TB .= line . "\n"
     endfor
-    let g:TB = g:TB ."\n" . "parameter     SYSCLK_PERIOD = 10 ;" . "\n\n" 
-    let g:TB = g:TB . "always\n" . "\t".'#(SYSCLK_PERIOD/2) ' . g:testbench_clk_name .' =~ ' . g:testbench_clk_name . ' ;' . "\n\n"
+    let g:TB .= "\n" . "parameter     SYSCLK_PERIOD = 10 ;" . "\n\n" 
+    let g:TB .=  "always\n" . "\t".'#(SYSCLK_PERIOD/2) ' . g:testbench_clk_name .' =~ ' . g:testbench_clk_name . ' ;' . "\n\n"
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "initial reg variables
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! testbench#init_reg(port_list)
-    let g:TB = g:TB . "initial\nbegin\n"
+    let g:TB .= "initial\nbegin\n"
     for line in a:port_list
         if line =~ 'reg'
-            let g:TB = g:TB . "\t" . substitute(line, 'reg\|\[.*\]\|;\|\s\+', '', 'g') . "\t" . "= 0 ;\n"
+            let g:TB .= "\t" . substitute(line, 'reg\|\[.*\]\|;\|\s\+', '', 'g') . "\t" . "= 0 ;\n"
         endif
     endfor
-    let g:TB = g:TB . "end\n" | let g:TB = g:TB . "\nendmodule" | let @t = g:TB
+    let g:TB .= "end\n" | let g:TB .= "\nendmodule" | let @t = g:TB
 endfunction
 
 function! testbench#instant_top()
