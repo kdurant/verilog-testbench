@@ -2,7 +2,7 @@ function! testbench#generate()
     if &filetype == 'verilog'
         let g:TB = ''
         let module_name = testbench#find_module_name(1, line('$'))
-        let port_list = testbench#delete_not_port_line(1, line('$'))
+        let port_list = testbench#find_port_line(1, line('$'))
         let port_list = testbench#clear_line_comments(port_list)
         let port_list = testbench#process_line_end(port_list)
         let port_list = testbench#clear_unnecessary_keyword(port_list)
@@ -41,14 +41,14 @@ endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "delete line that not is port declaration, and comments
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! testbench#delete_not_port_line(start_line, end_line)
+function! testbench#find_port_line(start_line, end_line)
     let current_line = a:start_line | let port_list = []
     while current_line <= a:end_line
         let line_context = getline(current_line)
         if line_context =~# '\(\<input\>\|\<output\>\|\<inout\>\)\+.*' &&
                     \ synIDattr(synID(current_line, 1, 1), "name") !~? 'comment'
             call add(port_list, line_context)
-        elseif line_context =~# '\(\<function\>\|\<task\>\).*;'
+        elseif line_context =~# '^\s*\(\<function\>\|\<task\>\).*;'
             break
         endif
 
@@ -95,12 +95,8 @@ endfunction
 function! testbench#parse_port(port_list)
     let port_list = []
     for line in a:port_list
-        let port_type = ''
-        let port_width = ''
-        let port_1 = ''
-        let port_2 = ''
-        let port_3 = ''
-        let port_4 = ''
+        let port_type = '' | let port_width = ''
+        let port_1 = '' | let port_2 = '' | let port_3 = '' | let port_4 = ''
         let line = substitute(line, 'reg\|wire', '', 'g')
         if line =~# '\<input\>\|\<output\>\|\<inout\>'
             let port_type = matchstr(line, '\<input\>\|\<output\>\|\<inout\>')
@@ -130,12 +126,8 @@ function! testbench#parse_port(port_list)
             let port_4 = matchstr(line, '\(\w\+\)')
             call add(port_list, port_type . "\t" . port_width . "\t" . port_4 . ' ;')
         endif
-        let port_type = ''
-        let port_width = ''
-        let port_1 = ''
-        let port_2 = ''
-        let port_3 = ''
-        let port_4 = ''
+        let port_type = '' | let port_width = ''
+        let port_1 = '' | let port_2 = '' | let port_3 = '' | let port_4 = ''
     endfor
     return port_list
 endfunction

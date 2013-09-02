@@ -3,7 +3,7 @@ function! instance#generate()
         let module_name = testbench#find_module_name(1, line('$'))
         let module_parameter = instance#find_module_parameter(1, line('$'))
 
-        let port_list = testbench#delete_not_port_line(1, line('$'))
+        let port_list = testbench#find_port_line(1, line('$'))
         let port_list = testbench#clear_line_comments(port_list)
         let port_list = testbench#process_line_end(port_list)
         let port_list = testbench#parse_port(port_list)
