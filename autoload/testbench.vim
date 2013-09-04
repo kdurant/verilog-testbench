@@ -226,3 +226,35 @@ function! testbench#instant_top()
     silent call instance#generate()
     exe 'wincmd p' | exe "normal Gkp" | exe "normal gg"
 endfunction
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"rapid input verilog port, reg and wire
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! testbench#insert()
+    let dir = input("Please type direction i or o or w or r: ")
+    if     dir == 'i' | let direction = 'input'  | let error_flag = 0
+    elseif dir == 'o' | let direction = 'output' | let error_flag = 0
+    elseif dir == 'w' | let direction = 'wire' | let error_flag = 0
+    elseif dir == 'r' | let direction = 'reg'  | let error_flag = 0
+    else | let error_flag = 1 | endif
+    if error_flag == 0
+        let width = input("Please enter width : ") | let width = width - 1
+        let name = input("Please enter port name : ")
+        if dir == 'r'
+            if width !=''
+                call setline(line('.'), direction ."\t\t" . "[" . width . ":0]" . "\t\t\t\t". name . " ;")
+            else
+                call setline(line('.'), direction ."\t\t\t\t\t\t\t". name . " ;")
+            endif
+        else
+            if width !=''
+                call setline(line('.'), direction ."\t" . "[" . width . ":0]" . "\t\t\t\t". name . " ;")
+            else
+                call setline(line('.'), direction ."\t\t\t\t\t\t". name . " ;")
+            endif
+        endif
+    else
+        echohl ErrorMsg | echo "Input errors!" | echohl None
+    endif
+endfunction
+
