@@ -238,7 +238,7 @@ function! testbench#insert()
     elseif dir == 'r' | let direction = 'reg'  | let error_flag = 0
     else | let error_flag = 1 | endif
     if error_flag == 0
-        let width = input("Please enter width : ") | let width = width - 1
+        let width = input("Please enter width : ") | let width = width != '' ? width -1 : width
         let name = input("Please enter port name : ")
         if dir == 'r'
             if width !=''
