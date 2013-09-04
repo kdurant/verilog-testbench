@@ -17,7 +17,7 @@ I hope you like it.
 > b, c ;  
 
 * Rapid input verilog port, reg and wire  
-  ![demo][https://f.cloud.github.com/assets/2704364/1078773/9e416ede-1533-11e3-8a98-4f5ddfdf0dd6.gif]
+  ![demo](https://f.cloud.github.com/assets/2704364/1078773/9e416ede-1533-11e3-8a98-4f5ddfdf0dd6.gif)
 
 * This plugin **don't check your syntax** whether is corrected. You should 
 invoke compiler to do it before use this plugin.
