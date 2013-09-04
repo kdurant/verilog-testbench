@@ -199,12 +199,12 @@ endfunction
 "write port infomation and initial system clock
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! testbench#write_context(module_name, port_list)
-    let g:TB .= "\n" . '`timescale  1 ns/1 ps' . "\n"
-    let g:TB .= "module\t" . a:module_name . g:testbench_suffix . '() ;' . "\n"
+    let g:TB .= "\n" . '`timescale  1 ns/1 ps' . "\n\n"
+    let g:TB .= "module\t" . a:module_name . g:testbench_suffix . '() ;' . "\n\n"
     for line in a:port_list
         let g:TB .= line . "\n"
     endfor
-    let g:TB .= "\n" . "parameter     SYSCLK_PERIOD = 10 ;" . "\n\n" 
+    let g:TB .= "\nparameter     SYSCLK_PERIOD = 10 ;\n\n" 
     let g:TB .=  "always\n" . "\t".'#(SYSCLK_PERIOD/2) ' . g:testbench_clk_name .' =~ ' . g:testbench_clk_name . ' ;' . "\n\n"
 endfunction
 
