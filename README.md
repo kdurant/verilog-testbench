@@ -1,5 +1,5 @@
 # AutoTestbench  
-A very simple plugin to generate verilog testbench file and component instance current design unit.   
+A very simple plugin to generate verilog testbench file, component instance current design unit and others.   
 I hope you like it.
 
 # Feature  
@@ -28,6 +28,9 @@ This plugin is very easy to use.
 Also you can define other maps to invoke it.  
 
 * Run **,in** (or **:Instance** in command line) to generate component instance, and use **p** to paste it.  
+
+* Run **:InsertPort** in command line to rapid input. Also, you can map it like below:  
+> imap   <M-i>   :InsertPort<cr\>
 
 # Installation  
 * Clone the plugin into a separate directory:  
@@ -62,4 +65,3 @@ Also you can define other maps to invoke it.
 
 # Contributions
 Contributions, issue and pull requests are welcome  
-
