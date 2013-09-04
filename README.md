@@ -24,7 +24,7 @@ This plugin is very easy to use.
 * Run **,tb** (or **:TestBench** in command line) to generate a testbench and will display it in current window.  
 Also you can define other maps to invoke it.  
 
-* Run **,in** (or **:Instance** in command line) to generate component instance
+* Run **,in** (or **:Instance** in command line) to generate component instance, and use **p** to paste it.  
 
 # Installation  
 * Clone the plugin into a separate directory:  
