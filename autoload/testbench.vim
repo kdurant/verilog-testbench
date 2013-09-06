@@ -6,8 +6,11 @@ function! testbench#generate()
         let port_list = testbench#clear_line_comments(port_list)
         let port_list = testbench#process_line_end(port_list)
         let port_list = testbench#clear_unnecessary_keyword(port_list)
+        "echo port_list
         let port_list = testbench#parse_port(port_list)
+        "echo port_list
 
+        "echo port_list
         let port_list = testbench#replace_keyword(port_list)
         if findfile(module_name . g:testbench_suffix .'.v') == ''
             call testbench#new_file(module_name, port_list)
@@ -26,7 +29,6 @@ endfunction
 "find module name
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! testbench#find_module_name(start_line, end_line)
-    let module_name = ''
     let current_line = a:start_line
     while current_line <= a:end_line
         if getline(current_line) =~# '^\s*module'
@@ -90,7 +92,7 @@ function! testbench#process_line_end(port_list)
 endfunction
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
-"parse port declaration
+"parse port declaration, find port
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! testbench#parse_port(port_list)
     let port_list = []
@@ -107,24 +109,32 @@ function! testbench#parse_port(port_list)
             let port_width = matchstr(line, '\[.*:.*\]')
             let line = substitute(line, '\[.*:.*\]\s\+', '', 'g')
         endif
+        "align
+        if strlen(port_width) == 0 
+            while strlen(port_type) < 20    | let port_type .= ' ' | endwhile
+        else
+            while strlen(port_type) < 8     | let port_type .= ' ' | endwhile
+            while strlen(port_width) < 12   | let port_width .= ' ' | endwhile
+        endif
+
         if line =~ ',' 
             let port_1 = matchstr(line, '\(\w\+\)')
             let line = substitute(line, '\w\+,', '', '')
-            call add(port_list, port_type . "\t" . port_width . "\t" . port_1 . ' ;')
+            call add(port_list, port_type . port_width . port_1 . ' ;')
         endif
         if line =~ ',' 
             let port_2 = matchstr(line, '\(\w\+\)')
             let line = substitute(line, '\w\+,', '', '')
-            call add(port_list, port_type . "\t" . port_width . "\t" . port_2 . ' ;')
+            call add(port_list, port_type . port_width . port_2 . ' ;')
         endif
         if line =~ ',' 
             let port_3 = matchstr(line, '\(\w\+\)')
             let line = substitute(line, '\w\+,', '', '')
-            call add(port_list, port_type . "\t" . port_width . "\t" . port_3 . ' ;')
+            call add(port_list, port_type . port_width . port_3 . ' ;')
         endif
         if line =~ ';' 
             let port_4 = matchstr(line, '\(\w\+\)')
-            call add(port_list, port_type . "\t" . port_width . "\t" . port_4 . ' ;')
+            call add(port_list, port_type . port_width . port_4 . ' ;')
         endif
         let port_type = '' | let port_width = ''
         let port_1 = '' | let port_2 = '' | let port_3 = '' | let port_4 = ''
@@ -153,11 +163,11 @@ function! testbench#replace_keyword(port_list)
     let port_list = []
     for line in a:port_list
         if line =~# 'input'
-            call add(port_list, substitute(line, 'input', 'reg', 'g'))
+            call add(port_list, substitute(line, 'input', 'reg  ', 'g'))
         elseif line =~# 'output'
-            call add(port_list, substitute(line, 'output', 'wire', 'g'))
+            call add(port_list, substitute(line, 'output', 'wire  ', 'g'))
         elseif line =~# 'inout'
-            call add(port_list, substitute(line, 'inout', 'reg', 'g'))
+            call add(port_list, substitute(line, 'inout', 'reg  ', 'g'))
         endif
     endfor
     return port_list
