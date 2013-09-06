@@ -111,7 +111,7 @@ function! testbench#parse_port(port_list)
             while strlen(port_type) < 20    | let port_type .= ' ' | endwhile
         else
             while strlen(port_type) < 8     | let port_type .= ' ' | endwhile
-            while strlen(port_width) < 12   | let port_width .= ' ' | endwhile
+            while strlen(port_width) < g:testbench_bracket_width   | let port_width .= ' ' | endwhile
         endif
 
         if line =~ ',' 
@@ -239,28 +239,30 @@ endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! testbench#insert()
     if &filetype == 'verilog'
-        let dir = input("Please type direction i or o or w or r: ")
-        if     dir == 'i' | let direction = 'input'  | let error_flag = 0
-        elseif dir == 'o' | let direction = 'output' | let error_flag = 0
-        elseif dir == 'w' | let direction = 'wire' | let error_flag = 0
-        elseif dir == 'r' | let direction = 'reg'  | let error_flag = 0
+        let error_flag = 0 
+        echohl Number | let dir = input("Please type direction i or o or w or r: ") "| echohl none
+        if     dir == 'i' | let direction = 'input   '
+        elseif dir == 'o' | let direction = 'output  '
+        elseif dir == 'w' | let direction = 'wire    '
+        elseif dir == 'r' | let direction = 'reg     '
         else | let error_flag = 1 | endif
+        let width = ''  | let value = input("Please enter value : ")
+        if strlen(value) == 0
+            while strlen(width) < g:testbench_bracket_width | let width .= ' ' | endwhile
+        else
+            if value == matchstr(value, '\<\d\+\>') "number 
+                let value -= 1 | let width = "[" . value . ":0]"
+                while strlen(width) < g:testbench_bracket_width | let width .= ' ' | endwhile
+            elseif value == matchstr(value, '\<\w\+\>') "string 
+                let width = "[" . value . '-1' . ":0]"
+                while strlen(width) < g:testbench_bracket_width | let width .= ' ' | endwhile
+            else | let error_flag = 1 | endif
+        endif
+        let name = input("Please enter port name : ") | echohl none
+        if strlen(name) == 0 | let error_flag = 1 | endif
+
         if error_flag == 0
-            let width = input("Please enter width : ") | let width = width != '' ? width -1 : width
-            let name = input("Please enter port name : ")
-            if dir == 'r'
-                if width !=''
-                    call setline(line('.'), direction ."\t\t" . "[" . width . ":0]" . "\t\t\t\t". name . " ;")
-                else
-                    call setline(line('.'), direction ."\t\t\t\t\t\t\t". name . " ;")
-                endif
-            else
-                if width !=''
-                    call setline(line('.'), direction ."\t" . "[" . width . ":0]" . "\t\t\t\t". name . " ;")
-                else
-                    call setline(line('.'), direction ."\t\t\t\t\t\t". name . " ;")
-                endif
-            endif
+            call setline(line('.'), direction . width . name . " ;")
         else
             echohl ErrorMsg | echo "Input errors!" | echohl None
         endif
