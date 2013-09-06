@@ -63,5 +63,9 @@ Also you can define other maps to invoke it.
     default:
     let g:testbench_suffix = 'Tb'
 
+* You can set suqare brackets part width
+    default:
+    let g:testbench_bracket_width = 12
+
 # Contributions
 Contributions, issue and pull requests are welcome  
