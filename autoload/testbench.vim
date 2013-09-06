@@ -6,11 +6,8 @@ function! testbench#generate()
         let port_list = testbench#clear_line_comments(port_list)
         let port_list = testbench#process_line_end(port_list)
         let port_list = testbench#clear_unnecessary_keyword(port_list)
-        "echo port_list
         let port_list = testbench#parse_port(port_list)
-        "echo port_list
 
-        "echo port_list
         let port_list = testbench#replace_keyword(port_list)
         if findfile(module_name . g:testbench_suffix .'.v') == ''
             call testbench#new_file(module_name, port_list)
@@ -92,7 +89,7 @@ function! testbench#process_line_end(port_list)
 endfunction
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
-"parse port declaration, find port
+"parse port declaration, find port and align
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! testbench#parse_port(port_list)
     let port_list = []
