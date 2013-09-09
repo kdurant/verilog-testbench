@@ -3,13 +3,13 @@ function! testbench#generate()
         let g:TB = ''
         let module_name = testbench#find_module_name(1, line('$'))
         let port_list = testbench#find_port_line(1, line('$'))
-        let port_list = testbench#clear_line_comments(port_list)
+        let port_list = testbench#delete_comment(port_list)
         let port_list = testbench#process_line_end(port_list)
         let port_list = testbench#clear_unnecessary_keyword(port_list)
         let port_list = testbench#parse_port(port_list)
 
         let port_list = testbench#replace_keyword(port_list)
-        if findfile(module_name . g:testbench_suffix .'.v') == ''
+        if findfile(module_name.g:testbench_suffix.'.v') == ''
             call testbench#new_file(module_name, port_list)
         else
             let choice = confirm("Rewrite existed Testbench?", "&Yes\n&No")
@@ -29,7 +29,7 @@ function! testbench#find_module_name(start_line, end_line)
     let current_line = a:start_line
     while current_line <= a:end_line
         if getline(current_line) =~# '^\s*module'
-            let module_name = substitute(getline(current_line),'module\s\+\(\w\+\)[^0-9A-Za-z]*.*', '\1', 'g')
+            let module_name = matchstr(getline(current_line),'module\s\+\zs\w\+\ze')
             break
         endif
         let current_line = current_line + 1
@@ -45,7 +45,7 @@ function! testbench#find_port_line(start_line, end_line)
     while current_line <= a:end_line
         let line_context = getline(current_line)
         if line_context =~# '\(\<input\>\|\<output\>\|\<inout\>\)\+.*' &&
-                    \ synIDattr(synID(current_line, 1, 1), "name") !~? 'comment'
+                    \ synIDattr(synID(current_line, 1, 1), "name") !~? 'comment'       "2001
             call add(port_list, line_context)
         elseif line_context =~# '^\s*\(\<function\>\|\<task\>\).*;'
             break
@@ -62,7 +62,7 @@ endfunction
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
 "delete comment at the end of line
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! testbench#clear_line_comments(port_list)
+function! testbench#delete_comment(port_list)
     let port_list = []
     for line in a:port_list
         call add(port_list, substitute(line, '\s*\(//.*\|/\*.*\)', '', 'g'))
@@ -117,21 +117,21 @@ function! testbench#parse_port(port_list)
         if line =~ ',' 
             let port_1 = matchstr(line, '\(\w\+\)')
             let line = substitute(line, '\w\+,', '', '')
-            call add(port_list, port_type . port_width . port_1 . ' ;')
+            call add(port_list, port_type.port_width.port_1 . ' ;')
         endif
         if line =~ ',' 
             let port_2 = matchstr(line, '\(\w\+\)')
             let line = substitute(line, '\w\+,', '', '')
-            call add(port_list, port_type . port_width . port_2 . ' ;')
+            call add(port_list, port_type.port_width.port_2 . ' ;')
         endif
         if line =~ ',' 
             let port_3 = matchstr(line, '\(\w\+\)')
             let line = substitute(line, '\w\+,', '', '')
-            call add(port_list, port_type . port_width . port_3 . ' ;')
+            call add(port_list, port_type.port_width.port_3 . ' ;')
         endif
         if line =~ ';' 
             let port_4 = matchstr(line, '\(\w\+\)')
-            call add(port_list, port_type . port_width . port_4 . ' ;')
+            call add(port_list, port_type.port_width.port_4 . ' ;')
         endif
         let port_type = '' | let port_width = ''
         let port_1 = '' | let port_2 = '' | let port_3 = '' | let port_4 = ''
@@ -207,7 +207,7 @@ endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! testbench#write_context(module_name, port_list)
     let g:TB .= "\n" . '`timescale  1 ns/1 ps' . "\n\n"
-    let g:TB .= "module\t" . a:module_name . g:testbench_suffix . '() ;' . "\n\n"
+    let g:TB .= "module " . a:module_name . g:testbench_suffix . '() ;' . "\n\n"
     for line in a:port_list
         let g:TB .= line . "\n"
     endfor
