@@ -17,8 +17,24 @@ call s:check_defined('g:testbench_clk_name','clk')
 call s:check_defined('g:testbench_suffix','Tb')
 call s:check_defined('g:testbench_bracket_width','12')
 
-nmap    ,tb     <esc>:TestBench<cr>
-nmap    ,in     <esc>:Instance<cr>
+if maparg(',tb') == ''
+    nmap    ,tb     <esc>:TestBench<cr>
+else
+    echo "Already map ,tb, you must remap for TestBench function"
+endif
+
+if maparg(',tb') == ''
+    nmap    ,in     <esc>:Instance<cr>
+else
+    echo "Already map ,in, you must remap for Instance function"
+endif
+
+if maparg(',tb') == ''
+    imap    <M-i>   <esc>:InsertPort<cr>
+else
+    echo "Already map <M-i>, you must remap for InsertPort function"
+endif
+
 command! -nargs=0 TestBench call testbench#generate()
 command! -nargs=0 Instance  call instance#generate()
 command! -nargs=0 InsertPort call testbench#insert()
