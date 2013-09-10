@@ -15,6 +15,9 @@ function! instance#generate()
     endif
 endfunction
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"get reg variable name
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! instance#get_port_name(port_list)
     let port_list = []
     for line in a:port_list
@@ -23,6 +26,9 @@ function! instance#get_port_name(port_list)
     return port_list
 endfunction
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"instance
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! instance#instance(module_name, module_parameter, port_list)
     let port_list = a:port_list
     if !empty(a:module_parameter)
@@ -68,6 +74,9 @@ function! instance#instance(module_name, module_parameter, port_list)
     echohl none
 endfunction
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"find all module parameter
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! instance#find_module_parameter(start_line, end_line)
     let module_parameter = []
     let current_line = a:start_line
@@ -85,6 +94,9 @@ function! instance#find_module_parameter(start_line, end_line)
     return module_parameter
 endfunction
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"get list element max string length
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! instance#max_port_length(port_list)
     let length_old = 0
     let length = 0 
@@ -100,3 +112,4 @@ function! instance#max_port_length(port_list)
     endfor
     return max_length
 endfunction
+
