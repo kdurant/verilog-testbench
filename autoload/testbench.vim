@@ -44,7 +44,7 @@ function! testbench#find_port_line(start_line, end_line)
     let current_line = a:start_line | let port_list = []
     while current_line <= a:end_line
         let line_context = getline(current_line)
-        if line_context =~# '\(\<input\>\|\<output\>\|\<inout\>\)\+.*' &&
+        if line_context =~# '\(^\s*\<input\>\|^\s*\<output\>\|^\s*\<inout\>\)\+.*' &&
                     \ synIDattr(synID(current_line, 1, 1), "name") !~? 'comment'       "2001
             call add(port_list, line_context)
         elseif line_context =~# '^\s*\(\<function\>\|\<task\>\).*;'
