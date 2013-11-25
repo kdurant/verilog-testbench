@@ -211,7 +211,8 @@ function! testbench#write_context(module_name, port_list)
     for line in a:port_list
         let g:TB .= line . "\n"
     endfor
-    let g:TB .= "\nparameter     SYSCLK_PERIOD = 10 ;\n\n" 
+    let g:TB .= "\nparameter     SYSCLK_FREQ = 50_000_000 ;\n" 
+    let g:TB .= "\nparameter     SYSCLK_PERIOD = (1_000_000_000 / SYSCLK_FREQ) ;\n\n" 
     let g:TB .=  "always\n" . "\t".'#(SYSCLK_PERIOD/2) ' . g:testbench_clk_name .' =~ ' . g:testbench_clk_name . ' ;' . "\n\n"
 endfunction
 
