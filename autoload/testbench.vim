@@ -164,7 +164,7 @@ function! testbench#replace_keyword(port_list)
         elseif line =~# 'output'
             call add(port_list, substitute(line, 'output', 'wire  ', 'g'))
         elseif line =~# 'inout'
-            call add(port_list, substitute(line, 'inout', 'reg  ', 'g'))
+            call add(port_list, substitute(line, 'inout', 'wire  ', 'g'))
         endif
     endfor
     return port_list
