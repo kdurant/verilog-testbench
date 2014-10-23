@@ -20,8 +20,8 @@ endfunction
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! instance#get_port_name(port_list)
     let port_list = []
-    for line in a:port_list
-        call add(port_list, substitute(line, '\s\+\|\<input\>\|\<output\>\|\<inout\>\|\[.*:.*\]\|\(\<\w\+\>\)\s*;', '\1', 'g'))
+    for l:line in a:port_list
+        call add(port_list, substitute(l:line, '\s\+\|\<input\>\|\<output\>\|\<inout\>\|\[.*:.*\]\|\(\<\w\+\>\)\s*;', '\1', 'g'))
     endfor
     return port_list
 endfunction
@@ -33,13 +33,13 @@ function! instance#instance(module_name, module_parameter, port_list)
     let port_list = a:port_list
     if !empty(a:module_parameter)
         let g:inst = a:module_name . "\t#\n(\n"
-        let current_number = 0
-        for line in a:module_parameter
-            let current_number = current_number + 1
-            if current_number == len(a:module_parameter)
-                let g:inst .= "\t." . matchstr(line, '^\w\+') . "\t\t(\t" . matchstr(line, '\w\+$') . "\t\t)" . "\n"
+        let l:num = 0
+        for l:line in a:module_parameter
+            let l:num = l:num + 1
+            if l:num == len(a:module_parameter)
+                let g:inst .= "\t." . matchstr(l:line, '^\w\+') . "\t\t(\t" . matchstr(l:line, '\w\+$') . "\t\t)" . "\n"
             else
-                let g:inst .= "\t." . matchstr(line, '^\w\+') . "\t\t(\t" . matchstr(line, '\w\+$') . "\t\t)" . ",\n"
+                let g:inst .= "\t." . matchstr(l:line, '^\w\+') . "\t\t(\t" . matchstr(l:line, '\w\+$') . "\t\t)" . ",\n"
             endif
         endfor
         let g:inst .= ")\n" . a:module_name . "Ex01\n(\n"
@@ -51,20 +51,20 @@ function! instance#instance(module_name, module_parameter, port_list)
 "calc max list length
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     let max_length = instance#max_port_length(port_list)
-    let current_number = 0
-    for line in a:port_list
-        let current_number = current_number + 1
-        if current_number == len(a:port_list) "last port
-            while strwidth(line) < max_length
-                let line = line." "
+    let l:num = 0
+    for l:line in a:port_list
+        let l:num = l:num + 1
+        if l:num == len(a:port_list) "last port
+            while strwidth(l:line) < max_length
+                let l:line = l:line." "
             endwhile
-            let g:inst .= "\t." . line . "\t(\t" . line . "\t)" . "\n"
+            let g:inst .= "\t." . l:line . "\t(\t" . l:line . "\t)" . "\n"
         else
-            let line_bak = line
-            while strwidth(line) < max_length
-                let line = line." "
+            let l:line_bak = l:line
+            while strwidth(l:line) < max_length
+                let l:line = l:line." "
             endwhile
-            let g:inst .= "\t." . line . "\t(\t" . line . "\t)" . ",\n"
+            let g:inst .= "\t." . l:line . "\t(\t" . l:line . "\t)" . ",\n"
         endif
     endfor
     let g:inst .= ") ;\n"
@@ -79,17 +79,17 @@ endfunction
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! instance#find_module_parameter(start_line, end_line)
     let module_parameter = []
-    let current_line = a:start_line
-    while current_line <= a:end_line
-        let line_context = getline(current_line)
-        if line_context =~# '\s*parameter.*=.*'
-            let line_context = substitute(line_context, '\s*\(//.*\|/\*.*\)', '', 'g')
-            let parameter_name = matchstr(line_context, '\s*parameter\s*\zs\w\+\ze\s*=')
-            let parameter_value = matchstr(line_context, '\s*parameter.*=\s*\zs\w\+\ze.*')
+    let l:line = a:start_line
+    while l:line <= a:end_line
+        let l:context = getline(l:line)
+        if l:context =~# '\s*parameter.*=.*'
+            let l:context = substitute(l:context, '\s*\(//.*\|/\*.*\)', '', 'g')
+            let parameter_name = matchstr(l:context, '\s*parameter\s*\zs\w\+\ze\s*=')
+            let parameter_value = matchstr(l:context, '\s*parameter.*=\s*\zs\w\+\ze.*')
             call add(module_parameter, parameter_name . "\t" . parameter_value)
         endif
-        if line_context =~ ');' | break | endif
-        let current_line = current_line + 1
+        if l:context =~ ');' | break | endif
+        let l:line = l:line + 1
     endwhile
     return module_parameter
 endfunction
@@ -101,8 +101,8 @@ function! instance#max_port_length(port_list)
     let length_old = 0
     let length = 0
     let max_length = 0
-    for line in a:port_list
-        let length = strwidth(line)
+    for l:line in a:port_list
+        let length = strwidth(l:line)
         if length > length_old
             let max_length = length
         else

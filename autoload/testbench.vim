@@ -1,7 +1,7 @@
 function! testbench#generate()
     if &filetype == 'verilog'
         let g:TB = ''
-        let module_name = testbench#find_module_name(1, line('$'))
+        let mod_name = testbench#find_module_name(1, line('$'))
         let port_list = testbench#find_port_line(1, line('$'))
         let port_list = testbench#delete_comment(port_list)
         let port_list = testbench#process_line_end(port_list)
@@ -9,12 +9,12 @@ function! testbench#generate()
         let port_list = testbench#parse_port(port_list)
 
         let port_list = testbench#replace_keyword(port_list)
-        if findfile(module_name.g:testbench_suffix.'.v') == ''
-            call testbench#new_file(module_name, port_list)
+        if findfile(mod_name.g:testbench_suffix.'.v') == ''
+            call testbench#new_file(mod_name, port_list)
         else
             let choice = confirm("Rewrite existed Testbench?", "&Yes\n&No")
             if choice
-                call testbench#new_file(module_name, port_list)
+                call testbench#new_file(mod_name, port_list)
             endif
         endif
     else
@@ -26,35 +26,35 @@ endfunction
 "find module name
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! testbench#find_module_name(start_line, end_line)
-    let current_line = a:start_line
-    while current_line <= a:end_line
-        if getline(current_line) =~# '^\s*module'
-            let module_name = matchstr(getline(current_line),'module\s\+\zs\w\+\ze')
+    let l:line = a:start_line
+    while l:line <= a:end_line
+        if getline(l:line) =~# '^\s*module'
+            let mod_name = matchstr(getline(l:line),'module\s\+\zs\w\+\ze')
             break
         endif
-        let current_line = current_line + 1
+        let l:line = l:line + 1
     endwhile
-    return module_name
+    return mod_name
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "delete line that not is port declaration, and comments
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! testbench#find_port_line(start_line, end_line)
-    let current_line = a:start_line | let port_list = []
-    while current_line <= a:end_line
-        let line_context = getline(current_line)
-        if line_context =~# '\(^\s*\<input\>\|^\s*\<output\>\|^\s*\<inout\>\)\+.*' &&
-                    \ synIDattr(synID(current_line, 1, 1), "name") !~? 'comment'       "2001
-            call add(port_list, line_context)
-        elseif line_context =~# '^\s*\(\<function\>\|\<task\>\).*;'
+    let l:line = a:start_line | let port_list = []
+    while l:line <= a:end_line
+        let l:text = getline(l:line)
+        if l:text =~# '\(^\s*\<input\>\|^\s*\<output\>\|^\s*\<inout\>\)\+.*' &&
+                    \ synIDattr(synID(l:line, 1, 1), "name") !~? 'comment'       "2001
+            call add(port_list, l:text)
+        elseif l:text =~# '^\s*\(\<function\>\|\<task\>\).*;'
             break
         endif
 
-        if getline( current_line ) =~? 'input.*clk'
-            let g:testbench_clk_name = substitute(getline(current_line), '\c.*\(\w*clk\w*\).*', '\1', 'g')
+        if getline( l:line ) =~? 'input.*clk'
+            let g:testbench_clk_name = substitute(getline(l:line), '\c.*\(\w*clk\w*\).*', '\1', 'g')
         endif
-        let current_line = current_line + 1
+        let l:line = l:line + 1
     endw
     return port_list
 endfunction
@@ -64,8 +64,8 @@ endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! testbench#delete_comment(port_list)
     let port_list = []
-    for line in a:port_list
-        call add(port_list, substitute(line, '\s*\(//.*\|/\*.*\)', '', 'g'))
+    for l:line in a:port_list
+        call add(port_list, substitute(l:line, '\s*\(//.*\|/\*.*\)', '', 'g'))
     endfor
     return port_list
 endfunction
@@ -76,13 +76,13 @@ endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! testbench#process_line_end(port_list)
     let port_list = []
-    for line in a:port_list
-        if line =~ ';\s*$'
-            call add(port_list, line)
-        elseif line =~ ",$"
-            call add(port_list, substitute(line, ',$', ';', ''))
+    for l:line in a:port_list
+        if l:line =~ ';\s*$'
+            call add(port_list, l:line)
+        elseif l:line =~ ",$"
+            call add(port_list, substitute(l:line, ',$', ';', ''))
         else
-            call add(port_list, substitute(line, '$', ';', ''))
+            call add(port_list, substitute(l:line, '$', ';', ''))
         endif
     endfor
     return port_list
@@ -93,18 +93,18 @@ endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! testbench#parse_port(port_list)
     let port_list = []
-    for line in a:port_list
+    for l:line in a:port_list
         let port_type = '' | let port_width = ''
         let port_1 = '' | let port_2 = '' | let port_3 = '' | let port_4 = ''
-        let line = substitute(line, 'reg\|wire', '', 'g')
-        if line =~# '\<input\>\|\<output\>\|\<inout\>'
-            let port_type = matchstr(line, '\<input\>\|\<output\>\|\<inout\>')
-            let line = substitute(line, '\<input\>\|\<output\>\|\<inout\>\s\+', '', 'g')
+        let l:line = substitute(l:line, 'reg\|wire', '', 'g')
+        if l:line =~# '\<input\>\|\<output\>\|\<inout\>'
+            let port_type = matchstr(l:line, '\<input\>\|\<output\>\|\<inout\>')
+            let l:line = substitute(l:line, '\<input\>\|\<output\>\|\<inout\>\s\+', '', 'g')
         endif
 
-        if line =~ '\[.*:.*\]'
-            let port_width = matchstr(line, '\[.*:.*\]')
-            let line = substitute(line, '\[.*:.*\]\s\+', '', 'g')
+        if l:line =~ '\[.*:.*\]'
+            let port_width = matchstr(l:line, '\[.*:.*\]')
+            let l:line = substitute(l:line, '\[.*:.*\]\s\+', '', 'g')
         endif
         "align
         if strlen(port_width) == 0
@@ -114,23 +114,23 @@ function! testbench#parse_port(port_list)
             while strlen(port_width) < g:testbench_bracket_width   | let port_width .= ' ' | endwhile
         endif
 
-        if line =~ ','
-            let port_1 = matchstr(line, '\(\w\+\)')
-            let line = substitute(line, '\w\+,', '', '')
+        if l:line =~ ','
+            let port_1 = matchstr(l:line, '\(\w\+\)')
+            let l:line = substitute(l:line, '\w\+,', '', '')
             call add(port_list, port_type.port_width.port_1 . ' ;')
         endif
-        if line =~ ','
-            let port_2 = matchstr(line, '\(\w\+\)')
-            let line = substitute(line, '\w\+,', '', '')
+        if l:line =~ ','
+            let port_2 = matchstr(l:line, '\(\w\+\)')
+            let l:line = substitute(l:line, '\w\+,', '', '')
             call add(port_list, port_type.port_width.port_2 . ' ;')
         endif
-        if line =~ ','
-            let port_3 = matchstr(line, '\(\w\+\)')
-            let line = substitute(line, '\w\+,', '', '')
+        if l:line =~ ','
+            let port_3 = matchstr(l:line, '\(\w\+\)')
+            let l:line = substitute(l:line, '\w\+,', '', '')
             call add(port_list, port_type.port_width.port_3 . ' ;')
         endif
-        if line =~ ';'
-            let port_4 = matchstr(line, '\(\w\+\)')
+        if l:line =~ ';'
+            let port_4 = matchstr(l:line, '\(\w\+\)')
             call add(port_list, port_type.port_width.port_4 . ' ;')
         endif
         let port_type = '' | let port_width = ''
@@ -144,13 +144,13 @@ endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! testbench#clear_unnecessary_keyword(port_list)
     let port_list = []
-    for line in a:port_list
-        if line =~# 'reg'
-            call add(port_list, substitute(line, 'reg', '', 'g'))
-        elseif line =~# 'wire'
-            call add(port_list, substitute(line, 'wire', '', 'g'))
+    for l:line in a:port_list
+        if l:line =~# 'reg'
+            call add(port_list, substitute(l:line, 'reg', '', 'g'))
+        elseif l:line =~# 'wire'
+            call add(port_list, substitute(l:line, 'wire', '', 'g'))
         else
-            call add(port_list, line)
+            call add(port_list, l:line)
         endif
     endfor
     return port_list
@@ -158,13 +158,13 @@ endfunction
 
 function! testbench#replace_keyword(port_list)
     let port_list = []
-    for line in a:port_list
-        if line =~# 'input'
-            call add(port_list, substitute(line, 'input', 'reg  ', 'g'))
-        elseif line =~# 'output'
-            call add(port_list, substitute(line, 'output', 'wire  ', 'g'))
-        elseif line =~# 'inout'
-            call add(port_list, substitute(line, 'inout', 'wire  ', 'g'))
+    for l:line in a:port_list
+        if l:line =~# 'input'
+            call add(port_list, substitute(l:line, 'input', 'reg  ', 'g'))
+        elseif l:line =~# 'output'
+            call add(port_list, substitute(l:line, 'output', 'wire  ', 'g'))
+        elseif l:line =~# 'inout'
+            call add(port_list, substitute(l:line, 'inout', 'wire  ', 'g'))
         endif
     endfor
     return port_list
@@ -173,15 +173,15 @@ endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "open new window
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! testbench#new_file(module_name, port_list)
-    let module_name = a:module_name
+function! testbench#new_file(mod_name, port_list)
+    let mod_name = a:mod_name
     let port_list = a:port_list
-    silent execute 'to '.'split ' . a:module_name . g:testbench_suffix . '.v'
+    silent execute 'to '.'split ' . a:mod_name . g:testbench_suffix . '.v'
     exe 'normal ggdG'
     if g:testbench_load_header
         call testbench#write_file_info()
     endif
-    call testbench#write_context(module_name, port_list)
+    call testbench#write_context(mod_name, port_list)
     call testbench#init_reg(port_list)
     call testbench#instant_top()
 endfunction
@@ -205,9 +205,9 @@ endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "write port infomation and initial system clock
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! testbench#write_context(module_name, port_list)
+function! testbench#write_context(mod_name, port_list)
     let g:TB .= "\n" . '`timescale  1 ns/1 ps' . "\n\n"
-    let g:TB .= "module " . a:module_name . g:testbench_suffix . '() ;' . "\n\n"
+    let g:TB .= "module " . a:mod_name . g:testbench_suffix . '() ;' . "\n\n"
     for line in a:port_list
         let g:TB .= line . "\n"
     endfor
