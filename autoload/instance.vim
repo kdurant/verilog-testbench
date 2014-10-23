@@ -33,9 +33,9 @@ function! instance#instance(module_name, module_parameter, port_list)
     let port_list = a:port_list
     if !empty(a:module_parameter)
         let g:inst = a:module_name . "\t#\n(\n"
-        let current_number = 0 
+        let current_number = 0
         for line in a:module_parameter
-            let current_number = current_number + 1 
+            let current_number = current_number + 1
             if current_number == len(a:module_parameter)
                 let g:inst .= "\t." . matchstr(line, '^\w\+') . "\t\t(\t" . matchstr(line, '\w\+$') . "\t\t)" . "\n"
             else
@@ -51,10 +51,10 @@ function! instance#instance(module_name, module_parameter, port_list)
 "calc max list length
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     let max_length = instance#max_port_length(port_list)
-    let current_number = 0 
+    let current_number = 0
     for line in a:port_list
-        let current_number = current_number + 1 
-        if current_number == len(a:port_list) "last port 
+        let current_number = current_number + 1
+        if current_number == len(a:port_list) "last port
             while strwidth(line) < max_length
                 let line = line." "
             endwhile
@@ -81,7 +81,7 @@ function! instance#find_module_parameter(start_line, end_line)
     let module_parameter = []
     let current_line = a:start_line
     while current_line <= a:end_line
-        let line_context = getline(current_line) 
+        let line_context = getline(current_line)
         if line_context =~# '\s*parameter.*=.*'
             let line_context = substitute(line_context, '\s*\(//.*\|/\*.*\)', '', 'g')
             let parameter_name = matchstr(line_context, '\s*parameter\s*\zs\w\+\ze\s*=')
@@ -99,13 +99,13 @@ endfunction
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! instance#max_port_length(port_list)
     let length_old = 0
-    let length = 0 
+    let length = 0
     let max_length = 0
     for line in a:port_list
         let length = strwidth(line)
         if length > length_old
             let max_length = length
-        else 
+        else
             let max_length = max_length
         endif
         let length_old = max_length

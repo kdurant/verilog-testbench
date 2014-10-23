@@ -13,7 +13,7 @@ function! testbench#generate()
             call testbench#new_file(module_name, port_list)
         else
             let choice = confirm("Rewrite existed Testbench?", "&Yes\n&No")
-            if choice == 1
+            if choice
                 call testbench#new_file(module_name, port_list)
             endif
         endif
@@ -59,7 +59,7 @@ function! testbench#find_port_line(start_line, end_line)
     return port_list
 endfunction
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "delete comment at the end of line
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! testbench#delete_comment(port_list)
@@ -71,7 +71,7 @@ function! testbench#delete_comment(port_list)
 endfunction
 
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "substitute comma or none with semicolon
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! testbench#process_line_end(port_list)
@@ -88,7 +88,7 @@ function! testbench#process_line_end(port_list)
     return port_list
 endfunction
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "parse port declaration, find port and align
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! testbench#parse_port(port_list)
@@ -107,29 +107,29 @@ function! testbench#parse_port(port_list)
             let line = substitute(line, '\[.*:.*\]\s\+', '', 'g')
         endif
         "align
-        if strlen(port_width) == 0 
+        if strlen(port_width) == 0
             while strlen(port_type) < 20    | let port_type .= ' ' | endwhile
         else
             while strlen(port_type) < 8     | let port_type .= ' ' | endwhile
             while strlen(port_width) < g:testbench_bracket_width   | let port_width .= ' ' | endwhile
         endif
 
-        if line =~ ',' 
+        if line =~ ','
             let port_1 = matchstr(line, '\(\w\+\)')
             let line = substitute(line, '\w\+,', '', '')
             call add(port_list, port_type.port_width.port_1 . ' ;')
         endif
-        if line =~ ',' 
+        if line =~ ','
             let port_2 = matchstr(line, '\(\w\+\)')
             let line = substitute(line, '\w\+,', '', '')
             call add(port_list, port_type.port_width.port_2 . ' ;')
         endif
-        if line =~ ',' 
+        if line =~ ','
             let port_3 = matchstr(line, '\(\w\+\)')
             let line = substitute(line, '\w\+,', '', '')
             call add(port_list, port_type.port_width.port_3 . ' ;')
         endif
-        if line =~ ';' 
+        if line =~ ';'
             let port_4 = matchstr(line, '\(\w\+\)')
             call add(port_list, port_type.port_width.port_4 . ' ;')
         endif
@@ -139,7 +139,7 @@ function! testbench#parse_port(port_list)
     return port_list
 endfunction
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "delete unnecessary keyword. eg. wire, reg signed. This is for verilog-2001 syntax
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! testbench#clear_unnecessary_keyword(port_list)
@@ -178,7 +178,7 @@ function! testbench#new_file(module_name, port_list)
     let port_list = a:port_list
     silent execute 'to '.'split ' . a:module_name . g:testbench_suffix . '.v'
     exe 'normal ggdG'
-    if g:testbench_load_header == 1
+    if g:testbench_load_header
         call testbench#write_file_info()
     endif
     call testbench#write_context(module_name, port_list)
@@ -192,12 +192,12 @@ endfunction
 function! testbench#write_file_info()
     let g:TB .= '/*============================================================================='."\n"
     let g:TB .= '# FileName    : ' . expand('%')."\n"
-    let g:TB .= '# Author      : ' . g:vimrc_author ."\n"                                              
-    let g:TB .= '# Email       : ' . g:vimrc_email ."\n"                                               
-    let g:TB .= '# Description : ' ."\n"                                                               
-    let g:TB .= '# Version     : V1.0'  ."\n"                                                          
-    let g:TB .= '# LastChange  : ' . strftime("%Y-%m-%d") ."\n"                                        
-    let g:TB .= '# ChangeLog   : '  ."\n"                                                              
+    let g:TB .= '# Author      : ' . g:vimrc_author ."\n"
+    let g:TB .= '# Email       : ' . g:vimrc_email ."\n"
+    let g:TB .= '# Description : ' ."\n"
+    let g:TB .= '# Version     : V1.0'  ."\n"
+    let g:TB .= '# LastChange  : ' . strftime("%Y-%m-%d") ."\n"
+    let g:TB .= '# ChangeLog   : '  ."\n"
     let g:TB .= '=============================================================================*/' ."\n"
 endfunction
 
@@ -211,8 +211,8 @@ function! testbench#write_context(module_name, port_list)
     for line in a:port_list
         let g:TB .= line . "\n"
     endfor
-    let g:TB .= "\nparameter     SYSCLK_FREQ = 50_000_000 ;\n" 
-    let g:TB .= "\nparameter     SYSCLK_PERIOD = (1_000_000_000 / SYSCLK_FREQ) ;\n\n" 
+    let g:TB .= "\nparameter     SYSCLK_FREQ = 50_000_000 ;\n"
+    let g:TB .= "\nparameter     SYSCLK_PERIOD = (1_000_000_000 / SYSCLK_FREQ) ;\n\n"
     let g:TB .=  "always\n" . "\t".'#(SYSCLK_PERIOD/2) ' . g:testbench_clk_name .' =~ ' . g:testbench_clk_name . ' ;' . "\n\n"
 endfunction
 
@@ -240,7 +240,7 @@ endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! testbench#insert()
     if &filetype == 'verilog'
-        let error_flag = 0 
+        let error_flag = 0
         echohl Number | let dir = input("Please type direction i or o or w or r: ") "| echohl none
         if     dir == 'i' | let direction = 'input   '
         elseif dir == 'o' | let direction = 'output  '
@@ -251,10 +251,10 @@ function! testbench#insert()
         if strlen(value) == 0
             while strlen(width) < g:testbench_bracket_width | let width .= ' ' | endwhile
         else
-            if value == matchstr(value, '\<\d\+\>') "number 
+            if value == matchstr(value, '\<\d\+\>') "number
                 let value -= 1 | let width = "[" . value . ":0]"
                 while strlen(width) < g:testbench_bracket_width | let width .= ' ' | endwhile
-            elseif value == matchstr(value, '\<\w\+\>') "string 
+            elseif value == matchstr(value, '\<\w\+\>') "string
                 let width = "[" . value . '-1' . ":0]"
                 while strlen(width) < g:testbench_bracket_width | let width .= ' ' | endwhile
             else | let error_flag = 1 | endif
