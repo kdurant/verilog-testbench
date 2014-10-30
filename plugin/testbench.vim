@@ -1,4 +1,4 @@
-" MIT license. Copyright (c) 2013 
+" MIT license. Copyright (c) 2013
 if &cp || v:version < 702 || (exists('g:loaded_verilog_testbench') && g:loaded_verilog_testbench)
   finish
 endif
