@@ -10,6 +10,7 @@ I hope you like it.
 - [x] Support verilog-2001 syntax
 
 - [x] Rapid input verilog port, reg and wire
+
   ![demo](https://f.cloud.github.com/assets/2704364/1078773/9e416ede-1533-11e3-8a98-4f5ddfdf0dd6.gif)
 
 # Note
@@ -41,30 +42,32 @@ Also you can define other maps to invoke it.
 
 Load file header like below:
 >    /*=============================================================================
+
 >    # FileName    : SPImasterTb.v
+
 >    # Author      : autor
->    # Email       : autor@gmail.com
+
+>    # Email       : autor@gmail.com 
+
 >    # Description :
+
 >    # Version     : V1.0
+
 >    # LastChange  : 2013-08-21
+
 >    # ChangeLog   :
+
 >    =============================================================================*/
 
-* If you g:testbench_load_header is 1, you should set these variables:
-    let g:vimrc_author='your name'
-    let g:vimrc_email='your email'
+- [x] let g:vimrc_author='your name'
+- [x] let g:vimrc_email='your email'
+If you g:testbench_load_header is 1, you should set these variables.
+> default:
+> let g:vimrc_author = 'author'
+> let g:vimrc_email  = 'email@email.com'
 
-    default:
-    let g:vimrc_author = 'author'
-    let g:vimrc_email  = 'email@email.com'
-
-* You can set testbench module name suffix with g:testbench_suffix
-    default:
-    let g:testbench_suffix = 'Tb'
-
-* You can set suqare brackets part width
-    default:
-    let g:testbench_bracket_width = 12
+- [x] let g:testbench_suffix = 'Tb'
+You can set testbench module name suffix with g:testbench_suffix
 
 # Contributions
 Contributions, issue and pull requests are welcome
