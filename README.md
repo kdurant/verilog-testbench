@@ -36,7 +36,9 @@ Also you can define other maps to invoke it.
 
 > $ cd ~/vimfiles/bundle
 > $ git clone https://github.com/kdurant/verilog-testbench.git  verilog-testbench
+
 or 
+
 > Plug 'kdurant/verilog-testbench'
 
 # Configuration
