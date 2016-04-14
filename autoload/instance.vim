@@ -5,8 +5,6 @@ function! instance#generate()
 
         let port_list = testbench#find_port_line(1, line('$'))
         let port_list = testbench#delete_comment(port_list)
-        let port_list = testbench#process_line_end(port_list)
-        let port_list = testbench#parse_port(port_list)
 
         let port_list = instance#get_port_name(port_list)
         call instance#instance(module_name, module_parameter, port_list)
@@ -20,8 +18,12 @@ endfunction
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! instance#get_port_name(port_list)
     let port_list = []
+    let tmp_line = ''
     for l:line in a:port_list
-        call add(port_list, substitute(l:line, '\s\+\|\<input\>\|\<output\>\|\<inout\>\|\[.*:.*\]\|\(\<\w\+\>\)\s*;', '\1', 'g'))
+        let tmp_line = substitute(l:line, '\<input\>\|\<output\>\|\<inout\>\|\<reg\>\|\<wire\>', '', 'g')
+        let tmp_line = substitute(tmp_line, ',\|;', '', 'g')
+        let tmp_line = substitute(tmp_line, '\[.*\]', '', 'g')
+        call add(port_list, substitute(tmp_line, '\s\+', '', 'g'))
     endfor
     return port_list
 endfunction
