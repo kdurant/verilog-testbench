@@ -34,8 +34,10 @@ Also you can define other maps to invoke it.
 # Installation
 * Clone the plugin into a separate directory:
 
-    $ cd ~/vimfiles/bundle
-    $ git clone https://github.com/kdurant/verilog-testbench.git  verilog-testbench
+> $ cd ~/vimfiles/bundle
+> $ git clone https://github.com/kdurant/verilog-testbench.git  verilog-testbench
+or 
+> Plug 'kdurant/verilog-testbench'
 
 # Configuration
 - [x]    let g:testbench_load_header = 1
