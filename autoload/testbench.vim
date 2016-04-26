@@ -178,27 +178,8 @@ function! testbench#new_file(mod_name, port_list)
     let port_list = a:port_list
     silent execute 'to '.'split ' . a:mod_name . g:testbench_suffix . '.v'
     exe 'normal ggdG'
-    if g:testbench_load_header
-        call testbench#write_file_info()
-    endif
     call testbench#write_context(mod_name, port_list)
-    call testbench#init_reg(port_list)
     call testbench#instant_top()
-endfunction
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"set file header
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! testbench#write_file_info()
-    let g:TB .= '/*============================================================================='."\n"
-    let g:TB .= '# FileName    : ' . expand('%')."\n"
-    let g:TB .= '# Author      : ' . g:vimrc_author ."\n"
-    let g:TB .= '# Email       : ' . g:vimrc_email ."\n"
-    let g:TB .= '# Description : ' ."\n"
-    let g:TB .= '# Version     : V1.0'  ."\n"
-    let g:TB .= '# LastChange  : ' . strftime("%Y-%m-%d") ."\n"
-    let g:TB .= '# ChangeLog   : '  ."\n"
-    let g:TB .= '=============================================================================*/' ."\n"
 endfunction
 
 
@@ -216,59 +197,9 @@ function! testbench#write_context(mod_name, port_list)
     let g:TB .=  "always\n" . "\t".'#(SYSCLK_PERIOD/2) ' . g:testbench_clk_name .' =~ ' . g:testbench_clk_name . ' ;' . "\n\n"
 endfunction
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"initial reg variables
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! testbench#init_reg(port_list)
-    let g:TB .= "initial\nbegin\n"
-    for line in a:port_list
-        if line =~# 'reg'
-            let g:TB .= "\t" . substitute(line, 'reg\|\[.*\]\|;\|\s\+', '', 'g') . "\t" . "= 0 ;\n"
-        endif
-    endfor
-    let g:TB .= "end\n" | let g:TB .= "\nendmodule" | let @t = g:TB
-endfunction
-
 function! testbench#instant_top()
+    let @t = g:TB
     exe "normal \"tP" | exe 'wincmd p'
     silent call instance#generate()
     exe 'wincmd p' | exe "normal Gkp" | exe "normal gg"
 endfunction
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"rapid input verilog port, reg and wire
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! testbench#insert()
-    if &filetype == 'verilog'
-        let error_flag = 0
-        echohl Number | let dir = input("Please type direction i or o or w or r: ") "| echohl none
-        if     dir == 'i' | let direction = 'input   '
-        elseif dir == 'o' | let direction = 'output  '
-        elseif dir == 'w' | let direction = 'wire    '
-        elseif dir == 'r' | let direction = 'reg     '
-        else | let error_flag = 1 | endif
-        let width = ''  | let value = input("Please enter value : ")
-        if strlen(value) == 0
-            while strlen(width) < g:testbench_bracket_width | let width .= ' ' | endwhile
-        else
-            if value == matchstr(value, '\<\d\+\>') "number
-                let value -= 1 | let width = "[" . value . ":0]"
-                while strlen(width) < g:testbench_bracket_width | let width .= ' ' | endwhile
-            elseif value == matchstr(value, '\<\w\+\>') "string
-                let width = "[" . value . '-1' . ":0]"
-                while strlen(width) < g:testbench_bracket_width | let width .= ' ' | endwhile
-            else | let error_flag = 1 | endif
-        endif
-        let name = input("Please enter port name : ") | echohl none
-        if strlen(name) == 0 | let error_flag = 1 | endif
-
-        if error_flag == 0
-            call setline(line('.'), direction . width . name . " ;")
-        else
-            echohl ErrorMsg | echo "Input errors!" | echohl None
-        endif
-    else
-        echohl ErrorMsg | echo 'Current filetype is not verilog!' | echohl none
-    endif
-endfunction
-
