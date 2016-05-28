@@ -114,3 +114,12 @@ function! instance#max_port_length(port_list)
     return max_length
 endfunction
 
+function! instance#vlog()
+    if &filetype == 'verilog'
+        let file_type = ''
+    elseif &filetype == 'systemverilog'
+        let file_type = '-sv '
+    endif
+    let @t = "vlog -work work -incr -vopt " . file_type . expand("%:p")
+    "exe "normal \"tP" | exe 'wincmd p'
+endfunction

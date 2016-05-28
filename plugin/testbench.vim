@@ -32,4 +32,5 @@ endif
 command! -nargs=0 TestBench call testbench#generate()
 command! -nargs=0 Instance  call instance#generate()
 command! -nargs=0 InsertPort call testbench#insert()
+command! -nargs=0 Vlog  call instance#vlog()
 
