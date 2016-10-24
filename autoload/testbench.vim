@@ -96,7 +96,7 @@ function! testbench#parse_port(port_list)
     for l:line in a:port_list
         let port_type = '' | let port_width = ''
         let port_1 = '' | let port_2 = '' | let port_3 = '' | let port_4 = ''
-        let l:line = substitute(l:line, 'reg\|wire', '', 'g')
+        let l:line = substitute(l:line, '\<reg\>\|wire', '', 'g')
         if l:line =~# '\<input\>\|\<output\>\|\<inout\>'
             let port_type = matchstr(l:line, '\<input\>\|\<output\>\|\<inout\>')
             let l:line = substitute(l:line, '\<input\>\|\<output\>\|\<inout\>\s\+', '', 'g')
@@ -117,21 +117,21 @@ function! testbench#parse_port(port_list)
         if l:line =~ ','
             let port_1 = matchstr(l:line, '\(\w\+\)')
             let l:line = substitute(l:line, '\w\+,', '', '')
-            call add(port_list, port_type.port_width.port_1 . ' ;')
+            call add(port_list, port_type.port_width.port_1 . ';')
         endif
         if l:line =~ ','
             let port_2 = matchstr(l:line, '\(\w\+\)')
             let l:line = substitute(l:line, '\w\+,', '', '')
-            call add(port_list, port_type.port_width.port_2 . ' ;')
+            call add(port_list, port_type.port_width.port_2 . ';')
         endif
         if l:line =~ ','
             let port_3 = matchstr(l:line, '\(\w\+\)')
             let l:line = substitute(l:line, '\w\+,', '', '')
-            call add(port_list, port_type.port_width.port_3 . ' ;')
+            call add(port_list, port_type.port_width.port_3 . ';')
         endif
         if l:line =~ ';'
             let port_4 = matchstr(l:line, '\(\w\+\)')
-            call add(port_list, port_type.port_width.port_4 . ' ;')
+            call add(port_list, port_type.port_width.port_4 . ';')
         endif
         let port_type = '' | let port_width = ''
         let port_1 = '' | let port_2 = '' | let port_3 = '' | let port_4 = ''
@@ -188,13 +188,13 @@ endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! testbench#write_context(mod_name, port_list)
     let g:TB .= "\n" . '`timescale  1 ns/1 ps' . "\n\n"
-    let g:TB .= "module " . a:mod_name . g:testbench_suffix . '() ;' . "\n\n"
+    let g:TB .= "module " . a:mod_name . g:testbench_suffix . '();' . "\n\n"
     for line in a:port_list
         let g:TB .= line . "\n"
     endfor
-    let g:TB .= "\nparameter     SYSCLK_FREQ = 50_000_000 ;\n"
-    let g:TB .= "\nparameter     SYSCLK_PERIOD = (1_000_000_000 / SYSCLK_FREQ) ;\n\n"
-    let g:TB .=  "always\n" . "\t".'#(SYSCLK_PERIOD/2) ' . g:testbench_clk_name .' =~ ' . g:testbench_clk_name . ' ;' . "\n\n"
+    let g:TB .= "\nparameter     SYSCLK_FREQ = 50_000_000;\n"
+    let g:TB .= "\nparameter     SYSCLK_PERIOD = (1_000_000_000 / SYSCLK_FREQ);\n\n"
+    let g:TB .=  "always\n" . "\t".'#(SYSCLK_PERIOD/2) ' . g:testbench_clk_name .' =~ ' . g:testbench_clk_name . ';' . "\n\nendmodule"
 endfunction
 
 function! testbench#instant_top()
