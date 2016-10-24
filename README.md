@@ -32,13 +32,26 @@ module spi_slave_core
 
 # Note
 1. **Don't support** port declaration like below:
-> intput      a,
 
-> b, c ;
+```verilog
+intput      a,
+b, c ;
+intput      a, b, c, d;
+```
 
-> intput      a, b, c, d;
+2. parameter declaration must like below(don't use space):
+```verilog
+module Top #
+(
+  parameter SATA_BURST_SIZE     = 32'd16*1024
+)
+(
+    input   xxx,
+    output  xxx
+);
+```
 
-2. This plugin **don't check your syntax** whether is corrected. It only find port declaration, you should invoke compiler to do it before use this plugin.
+3. This plugin **don't check your syntax** whether is corrected. It only find port declaration, you should invoke compiler to do it before use this plugin.
 
 # Usage
 This plugin is very easy to use.

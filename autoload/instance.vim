@@ -39,9 +39,10 @@ function! instance#instance(module_name, module_parameter, port_list)
         for l:line in a:module_parameter
             let l:num = l:num + 1
             if l:num == len(a:module_parameter)
-                let g:inst .= "\t." . matchstr(l:line, '^\w\+') . "\t\t(\t" . matchstr(l:line, '\w\+$') . "\t\t)" . "\n"
+                "                 .   BURTS                         (        1234* 234                      )
+                let g:inst .= "\t." . matchstr(l:line, '^\w\+') . "\t\t(\t" . matchstr(l:line, '\S\+$') . "\t\t)" . "\n"
             else
-                let g:inst .= "\t." . matchstr(l:line, '^\w\+') . "\t\t(\t" . matchstr(l:line, '\w\+$') . "\t\t)" . ",\n"
+                let g:inst .= "\t." . matchstr(l:line, '^\w\+') . "\t\t(\t" . matchstr(l:line, '\S\+$') . "\t\t)" . ",\n"
             endif
         endfor
         let g:inst .= ")\n" . a:module_name . "Ex01\n(\n"
@@ -86,7 +87,7 @@ function! instance#find_module_parameter(start_line, end_line)
         let l:context = getline(l:line)
         if l:context =~# '^\s*parameter.*=.*'
             let parameter_name = matchstr(l:context, '\s*parameter\s*\zs\w\+\ze\s*=')
-            let parameter_value = matchstr(l:context, '\s*parameter.*=\s*\zs\w\+\ze.*')
+            let parameter_value = matchstr(l:context, '\s*parameter.*=\s*\zs.*\d\ze.*')
             call add(module_parameter, parameter_name . "\t" . parameter_value)
         endif
         if l:context =~ ');' | break | endif
