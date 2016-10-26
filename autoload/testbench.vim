@@ -176,7 +176,7 @@ endfunction
 function! testbench#new_file(mod_name, port_list)
     let mod_name = a:mod_name
     let port_list = a:port_list
-    silent execute 'to '.'split ' . a:mod_name . g:testbench_suffix . '.v'
+    silent execute 'to '.'vsplit ' . a:mod_name . g:testbench_suffix . '.v'
     exe 'normal ggdG'
     call testbench#write_context(mod_name, port_list)
     call testbench#instant_top()
