@@ -13,8 +13,8 @@ endfunction
 call s:check_defined('g:vimrc_email', 'email@email.com')
 call s:check_defined('g:vimrc_author', 'author')
 call s:check_defined('g:testbench_load_header', 1)
-call s:check_defined('g:testbench_clk_name', 'clk')
 call s:check_defined('g:testbench_suffix', 'Tb')
+call s:check_defined('g:tb_filetype', 'systemverilog')
 call s:check_defined('g:testbench_bracket_width', '12')
 
 if maparg(',tb', 'n') == ''

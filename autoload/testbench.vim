@@ -2,9 +2,13 @@ function! testbench#generate()
     if &filetype == 'verilog'
         let g:TB = ''
         let mod_name = testbench#find_module_name(1, line('$'))
+        " 找到有效的端口声明行
         let port_list = testbench#find_port_line(1, line('$'))
+        " 删除有效端口声明中的末尾注释
         let port_list = testbench#delete_comment(port_list)
+        " 将逗号改成分号
         let port_list = testbench#process_line_end(port_list)
+        " 删除端口声明中不必要的reg，wire，给testbench用
         let port_list = testbench#clear_unnecessary_keyword(port_list)
         let port_list = testbench#parse_port(port_list)
 
@@ -51,9 +55,6 @@ function! testbench#find_port_line(start_line, end_line)
             break
         endif
 
-        if getline( l:line ) =~? 'input.*clk'
-            let g:testbench_clk_name = substitute(getline(l:line), '\c.*\(\w*clk\w*\).*', '\1', 'g')
-        endif
         let l:line = l:line + 1
     endw
     return port_list
@@ -159,12 +160,22 @@ endfunction
 function! testbench#replace_keyword(port_list)
     let port_list = []
     for l:line in a:port_list
-        if l:line =~# 'input'
-            call add(port_list, substitute(l:line, 'input', 'reg  ', 'g'))
-        elseif l:line =~# 'output'
-            call add(port_list, substitute(l:line, 'output', 'wire  ', 'g'))
-        elseif l:line =~# 'inout'
-            call add(port_list, substitute(l:line, 'inout', 'wire  ', 'g'))
+        if g:tb_filetype == 'systemverilog'
+            if l:line =~# 'input'
+                call add(port_list, substitute(l:line, 'input', 'logic', 'g'))
+            elseif l:line =~# 'output'
+                call add(port_list, substitute(l:line, 'output', 'logic ', 'g'))
+            elseif l:line =~# 'inout'
+                call add(port_list, substitute(l:line, 'inout', 'wire  ', 'g'))
+            endif
+        else
+            if l:line =~# 'input'
+                call add(port_list, substitute(l:line, 'input', 'reg  ', 'g'))
+            elseif l:line =~# 'output'
+                call add(port_list, substitute(l:line, 'output', 'wire  ', 'g'))
+            elseif l:line =~# 'inout'
+                call add(port_list, substitute(l:line, 'inout', 'wire  ', 'g'))
+            endif
         endif
     endfor
     return port_list
@@ -176,7 +187,11 @@ endfunction
 function! testbench#new_file(mod_name, port_list)
     let mod_name = a:mod_name
     let port_list = a:port_list
-    silent execute 'to '.'vsplit ' . a:mod_name . g:testbench_suffix . '.v'
+    if g:tb_filetype == 'systemverilog'
+        silent execute 'to '.'vsplit ' . a:mod_name . g:testbench_suffix . '.sv'
+    else
+        silent execute 'to '.'vsplit ' . a:mod_name . g:testbench_suffix . '.v'
+    endif
     exe 'normal ggdG'
     call testbench#write_context(mod_name, port_list)
     call testbench#instant_top()
@@ -192,9 +207,7 @@ function! testbench#write_context(mod_name, port_list)
     for line in a:port_list
         let g:TB .= line . "\n"
     endfor
-    let g:TB .= "\nparameter     SYSCLK_FREQ = 50_000_000;\n"
-    let g:TB .= "\nparameter     SYSCLK_PERIOD = (1_000_000_000 / SYSCLK_FREQ);\n\n"
-    let g:TB .=  "always\n" . "\t".'#(SYSCLK_PERIOD/2) ' . g:testbench_clk_name .' =~ ' . g:testbench_clk_name . ';' . "\n\nendmodule"
+    let g:TB .=   "\n\nendmodule"
 endfunction
 
 function! testbench#instant_top()
