@@ -1,126 +1,190 @@
+python3 << EOF
+import vim
+class VerilogParse:
+    def __init__(self):
+        self.buffer = vim.current.buffer
+        #self.buffer = open('insert_gps.v', 'r', encoding='utf-8').readlines()
+        self.port = []      # 存放端口列表
+        self.module_name = ''
+        self.module_para = []
+        self.content =[]
+
+        self.inst = ''
+
+        self.dict = {}
+
+    def paser_port(self):
+        for i in self.buffer:
+            line = i.strip()
+            line = line[:line.find('=')]  # 去掉逗号后面所有字符
+            line = line[:line.find(',')+1]     # 去掉逗号后面所有字符
+            line = line[:line.find('//')]    # 如果是最后一行端口声明，去掉注释
+            # print(line)
+            if line.find('always') != -1:
+                break
+            else:
+                if line.find('input') == 0 or line.find('output') == 0 or line.find('inout') == 0:
+                    if line.find('input') == 0:
+                        self.dict['port_type'] = 'input'        # 获得端口类型， 删除input字符串
+                        line = line.replace('input', '').strip()
+                    elif line.find('output') == 0:
+                        self.dict['port_type'] = 'output'  # 获得端口类型， 删除output字符串
+                        line = line.replace('output', '').strip()
+                    elif line.find('inout') == 0:
+                        self.dict['port_type'] = 'inout'  # 获得端口类型， 删除inout字符串
+                        line = line.replace('inout', '').strip()
+
+                    if line.find('reg') == 0:
+                        self.dict['vari_type'] = 'reg'
+                        line = line.replace('reg', '').strip()
+                    else:
+                        self.dict['vari_type'] = 'wire'
+                        line = line.replace('wire', '').strip()
+
+                    if line.find('[') == 0:
+                        self.dict['width'] = line[line.find('[') + 1:line.find(']')]
+
+                        line = line[line.find(']') + 1:].strip()
+                        self.dict['name'] = line
+                    else:
+                        self.dict['width'] = '1'
+                        self.dict['name'] = line
+
+                    dict = self.dict.copy()
+                    self.port.append(dict)
+        return self.port
+
+    """
+    删除文件里的所有注释代码
+    """
+    def delete_all_comment(self):
+        comment_flag = 0
+        for line in self.buffer:
+            line = line.strip()
+
+            if line.find('/*') == 0 and line.find('*/') > 2:
+                 continue
+            elif line.find('/*') == 0:
+                comment_flag = 1
+                continue
+            elif line.find('*/') != -1:
+                comment_flag = 0
+                continue
+
+            if comment_flag == 0:
+                if line.find('//') != -1:
+                    line = line[:line.find('//')]
+                    line = line.rstrip()
+                if line:
+                    self.content.append(line)
+        return self.content
+
+    def parse_module_name(self):
+        # self.module_name = 'test'
+
+        for line in self.content:
+            if line.find('module') != -1:
+                self.module_name = line.split(' ')[1]
+                break
+
+        return self.module_name
+
+    def parse_module_para(self):
+        self.delete_all_comment()
+        para_dict = {}
+        for line in self.content:
+            if line.find('input') != -1 or line.find('output') != -1 or line.find('inout') != -1 :
+                break
+            elif line.find('parameter') == 0:
+                line = line.replace('parameter', '').strip()
+                para_dict['para_name'] = line[:line.find('=')].strip()
+                para_dict['para_value'] = line[line.find('=')+1:].replace(',', '').strip().rstrip()
+
+                dict = para_dict.copy()
+                self.module_para.append(dict)
+
+        return self.module_para
+
+    def find_sub_module(self):
+        pass
+
+    def instance_module(self):
+        self.delete_all_comment()
+        module_name = self.parse_module_name()
+        port = self.paser_port()
+        module_para = self.parse_module_para()
+
+        max_length = 0
+        for p in port:
+            if max_length < len(p['name']):
+                max_length = len(p['name'])
+        for p in module_para:
+            if max_length < len(p['para_name']):
+                max_length = len(p['para_name'])
+        max_length = (max_length//4+1)*4  # tab 可以对齐
+
+        if module_para:
+            cnt = 0
+            self.inst = module_name + ' #\n(\n'
+            for ele in module_para:
+                if cnt + 1 == len(module_para):  # 最后一个参数
+                    self.inst += '    .' + ele['para_name'] + (max_length - len(ele['para_name'])) * ' ' + '(' + '  ' + \
+                                 ele['para_value'] + (max_length - len(ele['para_value'])) * ' ' + ')\n'
+                    self.inst += '\n)\n' + module_name + 'Ex01\n(\n'
+                else:
+                    self.inst += '    .' + ele['para_name'] + (max_length - len(ele['para_name']))*' ' + '(' + '  ' + ele['para_value'] +  (max_length-len(ele['para_value']))*' ' + '),\n'
+                    cnt += 1
+        else:
+            self.inst = module_name + ' ' + module_name + 'Ex01' + '\n(\n'
+
+        cnt = 0
+
+        for ele in port:
+            if cnt+1 == len(port):
+                self.inst += '    .' + ele['name'] + (max_length-len(ele['name']))*' ' + '(' + '  ' + ele['name'] + (max_length-len(ele['name'])+4)*' ' + ')'
+                self.inst += '\n);'
+            else:
+                self.inst += '    .' + ele['name'] + (max_length-len(ele['name']))*' ' + '(' + '  ' + ele['name'] +  (max_length-len(ele['name'])+4)*' ' + '),\n'
+            cnt += 1
+
+        return self.inst
+    # def align_instance(self):
+    #     p = re.compile(r'\.\w+\s*\(')
+    #
+    #     for line in self.content:
+    #
+    #     max_left = 0
+    #     for line in align:
+    #         t = line.split('(')
+    #         if max_left < len(t[0]):
+    #             max_left = len(t[0])
+    #
+    #     # for line in l:
+    #     for i in range(len(align)):
+    #         t = align[i].split('(')
+    #         t[0] = t[0].ljust(max_left+10)
+    #         t[1] = '(  '+t[1]
+    #         align[i] = ''.join(t)
+    #
+    #     for i in range(len(align)):
+    #         t = align[i].split(')')
+    #         t[0] = t[0].ljust((max_left+10)*2)
+    #         t[1] = ')'+t[1]
+    #         align[i] = ''.join(t)
+    #
+    #     for line in align:
+    #         print(line)
+    #         pass
+
+    def paste(self):
+        txt = self.instance_module()
+        vim.command('let @*= "%s"' % txt)
+        return txt
+EOF
+
+let s:com = "py3"
 function! instance#generate()
-    if &filetype == 'verilog'
-        let module_name = testbench#find_module_name(1, line('$'))
-        let module_parameter = instance#find_module_parameter(1, line('$'))
-
-        let port_list = testbench#find_port_line(1, line('$'))
-        let port_list = testbench#delete_comment(port_list)
-
-        let port_list = instance#get_port_name(port_list)
-        call instance#instance(module_name, module_parameter, port_list)
-    else
-        echohl ErrorMsg | echo 'Current filetype is not verilog!' | echohl none
-    endif
-endfunction
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"get reg variable name
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! instance#get_port_name(port_list)
-    let port_list = []
-    let tmp_line = ''
-    for l:line in a:port_list
-        let tmp_line = substitute(l:line, '\<input\>\|\<output\>\|\<inout\>\|\<reg\>\|\<wire\>', '', 'g')
-        let tmp_line = substitute(tmp_line, ',\|;', '', 'g')
-        let tmp_line = substitute(tmp_line, '\[.*\]', '', 'g')
-        call add(port_list, substitute(tmp_line, '\s\+', '', 'g'))
-    endfor
-    return port_list
-endfunction
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"instance
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! instance#instance(module_name, module_parameter, port_list)
-    let port_list = a:port_list
-    if !empty(a:module_parameter)
-        let g:inst = a:module_name . "\t#\n(\n"
-        let l:num = 0
-        for l:line in a:module_parameter
-            let l:num = l:num + 1
-            if l:num == len(a:module_parameter)
-                "                 .   BURTS                         (        1234* 234                      )
-                let g:inst .= "\t." . matchstr(l:line, '^\w\+') . "\t\t(\t" . matchstr(l:line, '\S\+$') . "\t\t)" . "\n"
-            else
-                let g:inst .= "\t." . matchstr(l:line, '^\w\+') . "\t\t(\t" . matchstr(l:line, '\S\+$') . "\t\t)" . ",\n"
-            endif
-        endfor
-        let g:inst .= ")\n" . a:module_name . "Ex01\n(\n"
-    else
-        let g:inst = a:module_name . "\t" . a:module_name . "Ex01\n(\n"
-    endif
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"calc max list length
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    let max_length = instance#max_port_length(port_list)
-    let l:num = 0
-    for l:line in a:port_list
-        let l:num = l:num + 1
-        if l:num == len(a:port_list) "last port
-            while strwidth(l:line) < max_length
-                let l:line = l:line." "
-            endwhile
-            let g:inst .= "\t." . l:line . "\t(\t" . l:line . "\t)" . "\n"
-        else
-            let l:line_bak = l:line
-            while strwidth(l:line) < max_length
-                let l:line = l:line." "
-            endwhile
-            let g:inst .= "\t." . l:line . "\t(\t" . l:line . "\t)" . ",\n"
-        endif
-    endfor
-    let g:inst .= ") ;\n"
-    let @+ = g:inst
-    echohl Operator
-    echo g:inst
-    echohl none
-endfunction
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"find all module parameter
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! instance#find_module_parameter(start_line, end_line)
-    let module_parameter = []
-    let l:line = a:start_line
-    while l:line <= a:end_line
-        let l:context = getline(l:line)
-        if l:context =~# '^\s*parameter.*=.*'
-            let parameter_name = matchstr(l:context, '\s*parameter\s*\zs\w\+\ze\s*=')
-            let parameter_value = matchstr(l:context, '\s*parameter.*=\s*\zs.*\d\ze.*')
-            call add(module_parameter, parameter_name . "\t" . parameter_value)
-        endif
-        if l:context =~ ');' | break | endif
-        let l:line = l:line + 1
-    endwhile
-    return module_parameter
-endfunction
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"get list element max string length
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! instance#max_port_length(port_list)
-    let length_old = 0
-    let length = 0
-    let max_length = 0
-    for l:line in a:port_list
-        let length = strwidth(l:line)
-        if length > length_old
-            let max_length = length
-        else
-            let max_length = max_length
-        endif
-        let length_old = max_length
-    endfor
-    return max_length
-endfunction
-
-function! instance#vlog()
-    if &filetype == 'verilog'
-        let file_type = ''
-    elseif &filetype == 'systemverilog'
-        let file_type = '-sv '
-    endif
-    let @t = "vlog -work work -incr -vopt " . file_type . expand("%:p")
-    "exe "normal \"tP" | exe 'wincmd p'
+    "python3 VerilogParse().paste()
+    exec s:com 'VerilogParse().paste()'
+    echo @*
 endfunction
