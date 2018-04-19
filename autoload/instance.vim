@@ -3,22 +3,25 @@ import vim
 class VerilogParse:
     def __init__(self):
         self.buffer = vim.current.buffer
-        #self.buffer = open('insert_gps.v', 'r', encoding='utf-8').readlines()
+        #self.buffer = open('up_ctrl.v', 'r', encoding='utf-8').readlines()
         self.port = []      # 存放端口列表
-        self.module_name = ''
         self.module_para = []
-        self.content =[]
+        self.content = []
 
         self.inst = ''
 
         self.dict = {}
 
-    def paser_port(self):
-        for i in self.buffer:
+    def paser_port(self, content):
+        for i in content:
             line = i.strip()
-            line = line[:line.find('=')]  # 去掉逗号后面所有字符
-            line = line[:line.find(',')+1]     # 去掉逗号后面所有字符
-            line = line[:line.find('//')]    # 如果是最后一行端口声明，去掉注释
+            if line.find('=') != -1:
+                line = line[:line.find('=')]  # 去掉逗号后面所有字符
+
+            if line.find(',') != -1:
+                line = line[:line.find(',')]     # 去掉逗号后面所有字符
+            if line.find('//') != -1:
+                line = line[:line.find('//')]    # 如果是最后一行端口声明，去掉注释
             # print(line)
             if line.find('always') != -1:
                 break
@@ -79,15 +82,13 @@ class VerilogParse:
                     self.content.append(line)
         return self.content
 
-    def parse_module_name(self):
-        # self.module_name = 'test'
-
-        for line in self.content:
+    def parse_module_name(self, content):
+        for line in content:
             if line.find('module') != -1:
-                self.module_name = line.split(' ')[1]
+                module_name = line.split(' ')[1]
                 break
 
-        return self.module_name
+        return module_name
 
     def parse_module_para(self):
         self.delete_all_comment()
@@ -110,8 +111,9 @@ class VerilogParse:
 
     def instance_module(self):
         self.delete_all_comment()
-        module_name = self.parse_module_name()
-        port = self.paser_port()
+
+        module_name = self.parse_module_name(self.content)
+        port = self.paser_port(self.content)
         module_para = self.parse_module_para()
 
         max_length = 0
@@ -129,7 +131,7 @@ class VerilogParse:
             for ele in module_para:
                 if cnt + 1 == len(module_para):  # 最后一个参数
                     self.inst += '    .' + ele['para_name'] + (max_length - len(ele['para_name'])) * ' ' + '(' + '  ' + \
-                                 ele['para_value'] + (max_length - len(ele['para_value'])) * ' ' + ')\n'
+                                 ele['para_value'] + (max_length - len(ele['para_value'])) * ' ' + ')'
                     self.inst += '\n)\n' + module_name + 'Ex01\n(\n'
                 else:
                     self.inst += '    .' + ele['para_name'] + (max_length - len(ele['para_name']))*' ' + '(' + '  ' + ele['para_value'] +  (max_length-len(ele['para_value']))*' ' + '),\n'
