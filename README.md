@@ -14,7 +14,9 @@ Plug 'kdurant/verilog-testbench'
 ```
 
 # Usage
-* Run **,in** (or **:Instance** in command line) to generate component instance, and use **p** to paste it.
+* Run **,in** (or `:VerilogInstance` in command line) to generate component instance, and use **p** to paste it.
+* Run `:VerilogInterface` to generate interface file that based current verilog file.
+* Run `:VerilogClass` to generate class file that based current verilog file.
 
 # Recommend module(port) declaration
 ```verilog
@@ -26,8 +28,8 @@ module spi_slave_core
     input  wire                 spi_dummy,
     input  wire [7:0]           spi_tx_data,
 
-    output  reg                 spi_oe,
-    output  reg [7:0]           spi_rx_data
+    output reg                  spi_oe,
+    output reg [7:0]            spi_rx_data
 );
 ```
 
@@ -52,4 +54,4 @@ module Top #
 );
 ```
 
-3. This plugin **don't check your syntax** whether is corrected. It only find port declaration, you should invoke compiler to do it before use this plugin.
+3. This plugin **don't check your syntax** whether is corrected. 

@@ -1,18 +1,26 @@
 python3 << EOF
 import vim
+import os
 class VerilogParse:
     def __init__(self):
-        self.buffer = vim.current.buffer
-        #self.buffer = open('up_ctrl.v', 'r', encoding='utf-8').readlines()
+        # self.buffer = vim.current.buffer
+        # self.buffer = open('location_module.v', 'r', encoding='utf-8').readlines()
+        self.buffer = open('pos_fifo.v', 'r', encoding='utf-8').readlines()
         self.port = []      # 存放端口列表
         self.module_para = []
-        self.content = []
 
         self.inst = ''
 
         self.dict = {}
 
+        self.content = self.delete_all_comment()
+
     def paser_port(self, content):
+        """
+        找到verilog里的所有端口
+        :param content:
+        :return:
+        """
         for i in content:
             line = i.strip()
             if line.find('=') != -1:
@@ -20,6 +28,8 @@ class VerilogParse:
 
             if line.find(',') != -1:
                 line = line[:line.find(',')]     # 去掉逗号后面所有字符
+            if line.find(';') != -1:
+                line = line[:line.find(';')]  # 去掉逗号后面所有字符
             if line.find('//') != -1:
                 line = line[:line.find('//')]    # 如果是最后一行端口声明，去掉注释
             # print(line)
@@ -57,10 +67,11 @@ class VerilogParse:
                     self.port.append(dict)
         return self.port
 
-    """
-    删除文件里的所有注释代码
-    """
     def delete_all_comment(self):
+        """
+        删除文件里的所有注释代码
+        """
+        content = []
         comment_flag = 0
         for line in self.buffer:
             line = line.strip()
@@ -79,8 +90,8 @@ class VerilogParse:
                     line = line[:line.find('//')]
                     line = line.rstrip()
                 if line:
-                    self.content.append(line)
-        return self.content
+                    content.append(line)
+        return content
 
     def parse_module_name(self, content):
         for line in content:
@@ -91,7 +102,6 @@ class VerilogParse:
         return module_name
 
     def parse_module_para(self):
-        self.delete_all_comment()
         para_dict = {}
         for line in self.content:
             if line.find('input') != -1 or line.find('output') != -1 or line.find('inout') != -1 :
@@ -110,8 +120,6 @@ class VerilogParse:
         pass
 
     def instance_module(self):
-        self.delete_all_comment()
-
         module_name = self.parse_module_name(self.content)
         port = self.paser_port(self.content)
         module_para = self.parse_module_para()
@@ -150,33 +158,54 @@ class VerilogParse:
             cnt += 1
 
         return self.inst
-    # def align_instance(self):
-    #     p = re.compile(r'\.\w+\s*\(')
-    #
-    #     for line in self.content:
-    #
-    #     max_left = 0
-    #     for line in align:
-    #         t = line.split('(')
-    #         if max_left < len(t[0]):
-    #             max_left = len(t[0])
-    #
-    #     # for line in l:
-    #     for i in range(len(align)):
-    #         t = align[i].split('(')
-    #         t[0] = t[0].ljust(max_left+10)
-    #         t[1] = '(  '+t[1]
-    #         align[i] = ''.join(t)
-    #
-    #     for i in range(len(align)):
-    #         t = align[i].split(')')
-    #         t[0] = t[0].ljust((max_left+10)*2)
-    #         t[1] = ')'+t[1]
-    #         align[i] = ''.join(t)
-    #
-    #     for line in align:
-    #         print(line)
-    #         pass
+
+    def create_interface_file(self):
+        """
+        在当前文件目录下，生成基于当前文件的 interface 文件
+        :return:
+        """
+        module_name = self.parse_module_name(self.content)
+        port = self.paser_port(self.content)
+        file_name = module_name + '_bfm.svh'
+        interface_content = 'interface ' + module_name + '_bfm;\n'
+        for p in port:
+            interface_content += '    '
+            interface_content += 'logic '
+
+            if p['width'] != '1':
+                interface_content += '[' + p['width'] + ']    ' + p['name'] + ';\n'
+            else:
+                interface_content += p['name'] + ';\n'
+        interface_content += '\nendinterface\n'
+        if os.path.exists(file_name) == False:
+            f = open(file_name, 'w')
+            f.write(interface_content)
+            f.close()
+
+    def create_class_file(self):
+        """
+        在当前文件目录下，生成基于当前文件的 class 文件
+        :return:
+        """
+        module_name = self.parse_module_name(self.content)
+        file_name = module_name + '_drive.svh'
+        class_content = '`ifndef ' + module_name.upper() + '_SVH\n'
+        class_content += '`define ' + module_name.upper() + '_SVH\n\n'
+        class_content += 'class ' + module_name + '_drive;\n'
+        class_content += '    virtual ' + module_name + '_bfm bfm;\n\n'
+        class_content += '    function new(virtual ' + module_name + '_bfm b, string name);\n'
+        class_content += '        bfm = b;\n'
+        class_content += '    endfunction\n\n'
+
+        class_content += 'extern virtual task execute ();\n\n'
+        class_content += 'endclass\n\n'
+        class_content += 'task adc_drive::execute ();\n\n'
+        class_content += 'endclass\n'
+
+        if os.path.exists(file_name) == False:
+            f = open(file_name, 'w')
+            f.write(class_content)
+            f.close()
 
     def paste(self):
         txt = self.instance_module()
@@ -186,7 +215,15 @@ EOF
 
 let s:com = "py3"
 function! instance#generate()
-    "python3 VerilogParse().paste()
+    " python3 VerilogParse().paste()
     exec s:com 'VerilogParse().paste()'
     echo @*
+endfunction
+
+function! instance#interface()
+    exec s:com 'VerilogParse().create_interface_file()'
+endfunction
+
+function! instance#class()
+    exec s:com 'VerilogParse().create_class_file()'
 endfunction

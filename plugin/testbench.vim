@@ -22,7 +22,7 @@ if maparg(',tb', 'n') == ''
 endif
 
 if maparg(',in', 'n') == ''
-    nmap    ,in     <esc>:Instance<cr>
+    nmap    ,in     <esc>:VerilogInstance<cr>
 endif
 
 if maparg('<M-i>', 'i') == ''
@@ -30,6 +30,8 @@ if maparg('<M-i>', 'i') == ''
 endif
 
 command! -nargs=0 TestBench call testbench#generate()
-command! -nargs=0 Instance  call instance#generate()
+command! -nargs=0 VerilogInstance  call instance#generate()
+command! -nargs=0 VerilogInterface  call instance#interface()
+command! -nargs=0 VerilogClass  call instance#class()
 command! -nargs=0 InsertPort call testbench#insert()
 command! -nargs=0 Vlog  call instance#vlog()
