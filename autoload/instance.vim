@@ -215,15 +215,27 @@ EOF
 
 let s:com = "py3"
 function! instance#generate()
-    " python3 VerilogParse().paste()
-    exec s:com 'VerilogParse().paste()'
-    echo @*
+    if &filetype == 'verilog'
+        " python3 VerilogParse().paste()
+        exec s:com 'VerilogParse().paste()'
+        echo @*
+    else
+        echomsg "Only support verilog file"
+    end
 endfunction
 
 function! instance#interface()
-    exec s:com 'VerilogParse().create_interface_file()'
+    if &filetype == 'verilog'
+        exec s:com 'VerilogParse().create_interface_file()'
+    else
+        echomsg "Only support verilog file"
+    end
 endfunction
 
 function! instance#class()
-    exec s:com 'VerilogParse().create_class_file()'
+    if &filetype == 'verilog'
+        exec s:com 'VerilogParse().create_class_file()'
+    else
+        echomsg "Only support verilog file"
+    end
 endfunction
