@@ -10,6 +10,68 @@ class VerilogParse:
         self.dict = {}
 
         self.content = self.delete_all_comment()
+        self.port = self.paser_port(self.content)
+        self.module_name = self.parse_module_name(self.content)
+        self.module_para = self.parse_module_para(self.content)
+
+    def parse_module_name(self, content):
+        """
+        找到文件的模块名称
+        :param content:
+        :return:
+        """
+        for line in content:
+            if line.find('module') != -1:
+                module_name = line.split(' ')[1]
+                break
+
+        return module_name
+
+    def parse_module_para(self):
+        """
+        找到文件的模块参数，存放到列表
+        :return:
+        """
+        module_para = []
+        para_dict = {}
+        for line in self.content:
+            if line.find('input') != -1 or line.find('output') != -1 or line.find('inout') != -1 :
+                break
+            elif line.find('parameter') == 0:
+                line = line.replace('parameter', '').strip()
+                para_dict['para_name'] = line[:line.find('=')].strip()
+                para_dict['para_value'] = line[line.find('=')+1:].replace(',', '').strip().rstrip()
+
+                dict = para_dict.copy()
+                module_para.append(dict)
+
+        return module_para
+
+    def delete_all_comment(self):
+        """
+        删除文件里的所有注释代码
+        """
+        content = []
+        comment_flag = 0
+        for line in self.buffer:
+            line = line.strip()
+
+            if line.find('/*') == 0 and line.find('*/') > 2:
+                 continue
+            elif line.find('/*') == 0:
+                comment_flag = 1
+                continue
+            elif line.find('*/') != -1:
+                comment_flag = 0
+                continue
+
+            if comment_flag == 0:
+                if line.find('//') != -1:
+                    line = line[:line.find('//')]
+                    line = line.rstrip()
+                if line:
+                    content.append(line)
+        return content
 
     def paser_port(self, content):
         """
@@ -64,65 +126,6 @@ class VerilogParse:
                     port.append(dict)
         return port
 
-    def delete_all_comment(self):
-        """
-        删除文件里的所有注释代码
-        """
-        content = []
-        comment_flag = 0
-        for line in self.buffer:
-            line = line.strip()
-
-            if line.find('/*') == 0 and line.find('*/') > 2:
-                 continue
-            elif line.find('/*') == 0:
-                comment_flag = 1
-                continue
-            elif line.find('*/') != -1:
-                comment_flag = 0
-                continue
-
-            if comment_flag == 0:
-                if line.find('//') != -1:
-                    line = line[:line.find('//')]
-                    line = line.rstrip()
-                if line:
-                    content.append(line)
-        return content
-
-    def parse_module_name(self, content):
-        """
-        找到文件的模块名称
-        :param content:
-        :return:
-        """
-        for line in content:
-            if line.find('module') != -1:
-                module_name = line.split(' ')[1]
-                break
-
-        return module_name
-
-    def parse_module_para(self):
-        """
-        找到文件的模块参数，存放到列表
-        :return:
-        """
-        module_para = []
-        para_dict = {}
-        for line in self.content:
-            if line.find('input') != -1 or line.find('output') != -1 or line.find('inout') != -1 :
-                break
-            elif line.find('parameter') == 0:
-                line = line.replace('parameter', '').strip()
-                para_dict['para_name'] = line[:line.find('=')].strip()
-                para_dict['para_value'] = line[line.find('=')+1:].replace(',', '').strip().rstrip()
-
-                dict = para_dict.copy()
-                module_para.append(dict)
-
-        return module_para
-
     def find_sub_module(self):
         pass
 
@@ -132,8 +135,8 @@ class VerilogParse:
         :return:
         """
         module_name = self.parse_module_name(self.content)
-        port = self.paser_port(self.content)
-        module_para = self.parse_module_para()
+        port = self.port
+        module_para = self.module_para
 
         max_length = 0
         for p in port:
@@ -176,7 +179,7 @@ class VerilogParse:
         :return:
         """
         module_name = self.parse_module_name(self.content)
-        port = self.paser_port(self.content)
+        port = self.port
         file_name = module_name + '_bfm.svh'
         interface_content = 'interface ' + module_name + '_bfm;\n'
         for p in port:
@@ -221,7 +224,7 @@ class VerilogParse:
 
     def create_testbench_file(self):
         module_name = self.parse_module_name(self.content)
-        port_list = self.paser_port(self.content)
+        port_list = self.port
         file_name = module_name + '_tb.sv'
         tb_content = '`timescale 1ns / 1ps\n\n'
         tb_content += 'module ' + module_name + '_tb();\n\n'
@@ -246,7 +249,7 @@ class VerilogParse:
             f.close()
 
     def paste(self):
-        txt = self.instance_module()
+        txt = self.creat_instance_snippet()
         vim.command('let @*= "%s"' % txt)
         return txt
 EOF
