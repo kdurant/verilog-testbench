@@ -3,13 +3,9 @@ import vim
 import os
 class VerilogParse:
     def __init__(self):
-        # self.buffer = vim.current.buffer
+        self.buffer = vim.current.buffer
         # self.buffer = open('location_module.v', 'r', encoding='utf-8').readlines()
-        self.buffer = open('pos_fifo.v', 'r', encoding='utf-8').readlines()
-        self.port = []      # 存放端口列表
-        self.module_para = []
-
-        self.inst = ''
+        # self.buffer = open('pos_fifo.v', 'r', encoding='utf-8').readlines()
 
         self.dict = {}
 
@@ -17,10 +13,11 @@ class VerilogParse:
 
     def paser_port(self, content):
         """
-        找到verilog里的所有端口
+        找到verilog里的所有端口, 存放到列表中
         :param content:
         :return:
         """
+        port = []
         for i in content:
             line = i.strip()
             if line.find('=') != -1:
@@ -64,8 +61,8 @@ class VerilogParse:
                         self.dict['name'] = line
 
                     dict = self.dict.copy()
-                    self.port.append(dict)
-        return self.port
+                    port.append(dict)
+        return port
 
     def delete_all_comment(self):
         """
@@ -94,6 +91,11 @@ class VerilogParse:
         return content
 
     def parse_module_name(self, content):
+        """
+        找到文件的模块名称
+        :param content:
+        :return:
+        """
         for line in content:
             if line.find('module') != -1:
                 module_name = line.split(' ')[1]
@@ -102,6 +104,11 @@ class VerilogParse:
         return module_name
 
     def parse_module_para(self):
+        """
+        找到文件的模块参数，存放到列表
+        :return:
+        """
+        module_para = []
         para_dict = {}
         for line in self.content:
             if line.find('input') != -1 or line.find('output') != -1 or line.find('inout') != -1 :
@@ -112,14 +119,18 @@ class VerilogParse:
                 para_dict['para_value'] = line[line.find('=')+1:].replace(',', '').strip().rstrip()
 
                 dict = para_dict.copy()
-                self.module_para.append(dict)
+                module_para.append(dict)
 
-        return self.module_para
+        return module_para
 
     def find_sub_module(self):
         pass
 
-    def instance_module(self):
+    def creat_instance_snippet(self):
+        """
+        生成模块的例化代码片段
+        :return:
+        """
         module_name = self.parse_module_name(self.content)
         port = self.paser_port(self.content)
         module_para = self.parse_module_para()
@@ -135,29 +146,29 @@ class VerilogParse:
 
         if module_para:
             cnt = 0
-            self.inst = module_name + ' #\n(\n'
+            instance_snippet = module_name + ' #\n(\n'
             for ele in module_para:
                 if cnt + 1 == len(module_para):  # 最后一个参数
-                    self.inst += '    .' + ele['para_name'] + (max_length - len(ele['para_name'])) * ' ' + '(' + '  ' + \
+                    instance_snippet += '    .' + ele['para_name'] + (max_length - len(ele['para_name'])) * ' ' + '(' + '  ' + \
                                  ele['para_value'] + (max_length - len(ele['para_value'])) * ' ' + ')'
-                    self.inst += '\n)\n' + module_name + 'Ex01\n(\n'
+                    instance_snippet += '\n)\n' + module_name + 'Ex01\n(\n'
                 else:
-                    self.inst += '    .' + ele['para_name'] + (max_length - len(ele['para_name']))*' ' + '(' + '  ' + ele['para_value'] +  (max_length-len(ele['para_value']))*' ' + '),\n'
+                    instance_snippet += '    .' + ele['para_name'] + (max_length - len(ele['para_name']))*' ' + '(' + '  ' + ele['para_value'] +  (max_length-len(ele['para_value']))*' ' + '),\n'
                     cnt += 1
         else:
-            self.inst = module_name + ' ' + module_name + 'Ex01' + '\n(\n'
+            instance_snippet = module_name + ' ' + module_name + 'Ex01' + '\n(\n'
 
         cnt = 0
 
         for ele in port:
             if cnt+1 == len(port):
-                self.inst += '    .' + ele['name'] + (max_length-len(ele['name']))*' ' + '(' + '  ' + ele['name'] + (max_length-len(ele['name'])+4)*' ' + ')'
-                self.inst += '\n);'
+                instance_snippet += '    .' + ele['name'] + (max_length-len(ele['name']))*' ' + '(' + '  ' + ele['name'] + (max_length-len(ele['name'])+4)*' ' + ')'
+                instance_snippet += '\n);'
             else:
-                self.inst += '    .' + ele['name'] + (max_length-len(ele['name']))*' ' + '(' + '  ' + ele['name'] +  (max_length-len(ele['name'])+4)*' ' + '),\n'
+                instance_snippet += '    .' + ele['name'] + (max_length-len(ele['name']))*' ' + '(' + '  ' + ele['name'] +  (max_length-len(ele['name'])+4)*' ' + '),\n'
             cnt += 1
 
-        return self.inst
+        return instance_snippet
 
     def create_interface_file(self):
         """
@@ -199,12 +210,39 @@ class VerilogParse:
 
         class_content += 'extern virtual task execute ();\n\n'
         class_content += 'endclass\n\n'
-        class_content += 'task adc_drive::execute ();\n\n'
+        class_content += 'task ' + module_name + '_drive::execute ();\n\n'
+        class_content += 'endtask\n\n'
         class_content += 'endclass\n'
 
         if os.path.exists(file_name) == False:
             f = open(file_name, 'w')
             f.write(class_content)
+            f.close()
+
+    def create_testbench_file(self):
+        module_name = self.parse_module_name(self.content)
+        port_list = self.paser_port(self.content)
+        file_name = module_name + '_tb.sv'
+        tb_content = '`timescale 1ns / 1ps\n\n'
+        tb_content += 'module ' + module_name + '_tb();\n\n'
+        for line in port_list:
+            if line['port_type'] == 'input':
+                if  line['width'] == '1':
+                    tb_content += 'logic ' + line['name'] + ' = 0;\n'
+                else:
+                    tb_content += 'logic [' + line['width'] + '] ' + line['name'] + ' = 0;\n'
+            else:
+                if  line['width'] == '1':
+                    tb_content += 'logic ' + line['name'] + ';\n'
+                else:
+                    tb_content += 'logic [' + line['width'] + '] ' + line['name'] + ';\n'
+        tb_content += '\n'
+        tb_content += self.creat_instance_snippet();
+        tb_content += '\n\nendmodule\n'
+
+        if os.path.exists(file_name) == False:
+            f = open(file_name, 'w')
+            f.write(tb_content)
             f.close()
 
     def paste(self):
@@ -235,6 +273,14 @@ endfunction
 function! instance#class()
     if &filetype == 'verilog'
         exec s:com 'VerilogParse().create_class_file()'
+    else
+        echomsg "Only support verilog file"
+    end
+endfunction
+
+function! instance#testbench()
+    if &filetype == 'verilog'
+        exec s:com 'VerilogParse().create_testbench_file()'
     else
         echomsg "Only support verilog file"
     end
