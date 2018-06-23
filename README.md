@@ -1,7 +1,5 @@
 # AutoTestbench
-A very simple plugin for component instance current file
-
-I hope you like it.
+A simple plugin for edit verilog. I hope you like it.
 
 # Feature
 - [x] Generate component instance
@@ -14,9 +12,10 @@ Plug 'kdurant/verilog-testbench'
 ```
 
 # Usage
+* Run `:Testbench` to generate testbench file that based current verilog file.
 * Run **,in** (or `:VerilogInstance` in command line) to generate component instance, and use **p** to paste it.
-* Run `:VerilogInterface` to generate interface file that based current verilog file.
-* Run `:VerilogClass` to generate class file that based current verilog file.
+* Run `:VerilogInterface` to generate interface(SystemVerilog) file that based current verilog file.
+* Run `:VerilogClass` to generate class(SystemVerilog) file that based current verilog file.
 
 # Recommend module(port) declaration
 ```verilog
@@ -34,7 +33,9 @@ module spi_slave_core
 ```
 
 # Note
-1. Don't support port declaration like below:
+1. This plugin **don't check your syntax** whether is corrected. 
+
+2. Don't support port declaration like below:
 
 ```verilog
 intput      a,
@@ -42,7 +43,7 @@ b, c ;
 intput      a, b, c, d;
 ```
 
-2. parameter declaration must like below:
+3. parameter declaration must like below:
 ```verilog
 module Top #
 (
@@ -53,5 +54,3 @@ module Top #
     output  xxx
 );
 ```
-
-3. This plugin **don't check your syntax** whether is corrected. 

@@ -82,16 +82,21 @@ class VerilogParse:
         port = []
         for i in content:
             line = i.strip()
+            # 去掉 '=' 后面所有字符, eg: output reg cnt = 0,
             if line.find('=') != -1:
-                line = line[:line.find('=')]  # 去掉逗号后面所有字符
-
+                line = line[:line.find('=')]
+            # 去掉 ',' 后面所有字符
             if line.find(',') != -1:
-                line = line[:line.find(',')]     # 去掉逗号后面所有字符
+                line = line[:line.find(',')]
+            # 去掉 ';' 后面所有字符
             if line.find(';') != -1:
-                line = line[:line.find(';')]  # 去掉逗号后面所有字符
+                line = line[:line.find(';')]
+
             if line.find('//') != -1:
                 line = line[:line.find('//')]    # 如果是最后一行端口声明，去掉注释
             # print(line)
+
+            # 默认always语句后不会再有端口声明
             if line.find('always') != -1:
                 break
             else:
