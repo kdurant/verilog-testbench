@@ -12,10 +12,11 @@ Plug 'kdurant/verilog-testbench'
 ```
 
 # Usage
-* Run `:Testbench` to generate testbench file that based current verilog file.
-* Run **,in** (or `:VerilogInstance` in command line) to generate component instance, and use **p** to paste it.
-* Run `:VerilogInterface` to generate interface(SystemVerilog) file that based current verilog file.
-* Run `:VerilogClass` to generate class(SystemVerilog) file that based current verilog file.
+* Run `:Testbench` to generate testbench templet
+* Run `:VerilogInstance` to generate component instance
+* Run `:VerilogInterface` to generate interface(SystemVerilog) templet
+* Run `:VerilogClass` to generate class(SystemVerilog) templet
+You use **p** to paste it.
 
 # Recommend module(port) declaration
 ```verilog

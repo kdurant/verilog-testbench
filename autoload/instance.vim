@@ -12,7 +12,7 @@ class VerilogParse:
         self.content = self.delete_all_comment()
         self.port = self.paser_port(self.content)
         self.module_name = self.parse_module_name(self.content)
-        self.module_para = self.parse_module_para(self.content)
+        self.module_para = self.parse_module_para()
 
     def parse_module_name(self, content):
         """
@@ -176,6 +176,7 @@ class VerilogParse:
                 instance_snippet += '    .' + ele['name'] + (max_length-len(ele['name']))*' ' + '(' + '  ' + ele['name'] +  (max_length-len(ele['name'])+4)*' ' + '),\n'
             cnt += 1
 
+        vim.command('let @*= "%s"' % instance_snippet)
         return instance_snippet
 
     def create_interface_file(self):
@@ -196,10 +197,14 @@ class VerilogParse:
             else:
                 interface_content += p['name'] + ';\n'
         interface_content += '\nendinterface\n'
-        if os.path.exists(file_name) == False:
-            f = open(file_name, 'w')
-            f.write(interface_content)
-            f.close()
+
+        vim.command('let @*= "%s"' % interface_content)
+        vim.command('echo @*')
+
+        #if os.path.exists(file_name) == False:
+        #    f = open(file_name, 'w')
+        #    f.write(interface_content)
+        #    f.close()
 
     def create_class_file(self):
         """
@@ -222,10 +227,12 @@ class VerilogParse:
         class_content += 'endtask\n\n'
         class_content += 'endclass\n'
 
-        if os.path.exists(file_name) == False:
-            f = open(file_name, 'w')
-            f.write(class_content)
-            f.close()
+        vim.command('let @*= "%s"' % class_content)
+        vim.command('echo @*')
+        #if os.path.exists(file_name) == False:
+        #    f = open(file_name, 'w')
+        #    f.write(class_content)
+        #    f.close()
 
     def create_testbench_file(self):
         module_name = self.parse_module_name(self.content)
@@ -248,22 +255,20 @@ class VerilogParse:
         tb_content += self.creat_instance_snippet();
         tb_content += '\n\nendmodule\n'
 
-        if os.path.exists(file_name) == False:
-            f = open(file_name, 'w')
-            f.write(tb_content)
-            f.close()
+        vim.command('let @*= "%s"' % tb_content)
+        vim.command('echo @*')
 
-    def paste(self):
-        txt = self.creat_instance_snippet()
-        vim.command('let @*= "%s"' % txt)
-        return txt
+        #if os.path.exists(file_name) == False:
+        #    vim.command('let @*= "%s"' % tb_content)
+        #    f = open(file_name, 'w')
+        #    f.write(tb_content)
+        #    f.close()
 EOF
 
 let s:com = "py3"
 function! instance#generate()
     if &filetype == 'verilog'
-        " python3 VerilogParse().paste()
-        exec s:com 'VerilogParse().paste()'
+        exec s:com 'VerilogParse().creat_instance_snippet()'
         echo @*
     else
         echomsg "Only support verilog file"
