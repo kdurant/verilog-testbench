@@ -256,6 +256,7 @@ class VerilogParse:
         tb_content += '\n\nendmodule\n'
 
         vim.command('let @*= "%s"' % tb_content)
+        vim.command('let @+= "%s"' % tb_content)
         vim.command('echo @*')
 
         #if os.path.exists(file_name) == False:
