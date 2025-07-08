@@ -159,8 +159,14 @@ end
 -- 生成例化模板
 local function generate_instance_template(module_info, config)
   local lines = {}
-  local instance_prefix = config and config.instance_prefix or "u_"
-  local instance_name = instance_prefix .. module_info.name
+  local instance_suffix = config and config.instance_suffix or "_Ex01"
+  local instance_name = module_info.name .. instance_suffix
+  
+  -- 计算最大端口名长度用于对齐
+  local max_port_length = 0
+  for _, port in ipairs(module_info.ports) do
+    max_port_length = math.max(max_port_length, #port.name)
+  end
   
   -- 如果有参数，先生成参数列表
   if module_info.parameters and #module_info.parameters > 0 then
@@ -168,7 +174,7 @@ local function generate_instance_template(module_info, config)
     table.insert(lines, "(")
     for i, param in ipairs(module_info.parameters) do
       local comma = (i < #module_info.parameters) and "," or ""
-      local connection = string.format("    .%s(%s)%s", param, param, comma)
+      local connection = string.format("    .%-" .. max_port_length .. "s (  %-" .. max_port_length .. "s )%s", param, param, comma)
       table.insert(lines, connection)
     end
     table.insert(lines, ")")
@@ -183,7 +189,7 @@ local function generate_instance_template(module_info, config)
   -- 生成端口连接
   for i, port in ipairs(module_info.ports) do
     local comma = (i < #module_info.ports) and "," or ""
-    local connection = string.format("    .%s(%s)%s", port.name, port.name, comma)
+    local connection = string.format("    .%-" .. max_port_length .. "s (  %-" .. max_port_length .. "s )%s", port.name, port.name, comma)
     table.insert(lines, connection)
   end
   

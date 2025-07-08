@@ -16,7 +16,7 @@
 3. **配置插件** (可选)
    ```lua
    require("verilog_instance").setup({
-     instance_prefix = "u_",  -- 实例名前缀
+     instance_suffix = "_Ex01",
      show_template = true,    -- 显示生成的模板
    })
    ```

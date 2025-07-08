@@ -2,10 +2,10 @@
 local module = require("verilog_instance.module")
 
 ---@class Config
----@field instance_prefix string 例化实例名前缀
+---@field instance_suffix string 例化实例名后缀
 ---@field show_template boolean 是否在命令行显示生成的模板
 local config = {
-  instance_prefix = "u_",
+  instance_suffix = "_Ex01",
   show_template = true,
 }
 

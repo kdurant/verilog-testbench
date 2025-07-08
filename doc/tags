@@ -1,0 +1,10 @@
+my-template-docs-links	my-template-docs.txt	/*my-template-docs-links*
+verilog-testbench-docs-links	verilog-testbench-docs.txt	/*verilog-testbench-docs-links*
+verilog-testbench-docs-table-of-contents	my-template-docs.txt	/*verilog-testbench-docs-table-of-contents*
+verilog-testbench-docs-table-of-contents	verilog-testbench-docs.txt	/*verilog-testbench-docs-table-of-contents*
+verilog-testbench-docs-verilog-instance-generator	my-template-docs.txt	/*verilog-testbench-docs-verilog-instance-generator*
+verilog-testbench-docs-verilog-instance-generator	verilog-testbench-docs.txt	/*verilog-testbench-docs-verilog-instance-generator*
+verilog-testbench-docs-verilog-instance-generator-using-it	my-template-docs.txt	/*verilog-testbench-docs-verilog-instance-generator-using-it*
+verilog-testbench-docs-verilog-instance-generator-using-it	verilog-testbench-docs.txt	/*verilog-testbench-docs-verilog-instance-generator-using-it*
+verilog-testbench-docs.txt	my-template-docs.txt	/*verilog-testbench-docs.txt*
+verilog-testbench-docs.txt	verilog-testbench-docs.txt	/*verilog-testbench-docs.txt*
