@@ -91,9 +91,18 @@ local function parse_verilog_module(content)
             direction = "inout"
           end
           
+          -- 改进的端口名提取逻辑
+          -- 移除方向关键字
+          local clean_decl = port_decl:gsub("^%s*input%s*", ""):gsub("^%s*output%s*", ""):gsub("^%s*inout%s*", "")
+          -- 移除数据类型
+          clean_decl = clean_decl:gsub("^%s*logic%s*", ""):gsub("^%s*wire%s*", ""):gsub("^%s*reg%s*", "")
+          -- 移除位宽声明
+          clean_decl = clean_decl:gsub("%[[^%]]*%]%s*", "")
+          -- 移除初始值赋值（如 = 0）
+          clean_decl = clean_decl:gsub("%s*=%s*[^%s]*", "")
           -- 提取端口名（最后一个单词）
-          local port_name = port_decl:match("([%w_]+)%s*$")
-          if port_name then
+          local port_name = clean_decl:match("([%w_]+)%s*$")
+          if port_name and port_name ~= "" then
             table.insert(ports, {
               name = port_name,
               direction = direction
@@ -215,11 +224,28 @@ M.generate_verilog_instance = function(config)
   local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
   local content = table.concat(lines, "\n")
   
+  -- 调试信息
+  if config and config.show_template then
+    print("解析文件: " .. filename)
+    print("文件内容长度: " .. #content)
+  end
+  
   -- 解析模块
   local module_info, err = parse_verilog_module(content)
   if not module_info then
     vim.notify("解析模块失败: " .. (err or "未知错误"), vim.log.levels.ERROR)
     return
+  end
+  
+  -- 调试信息：显示解析结果
+  if config and config.show_template then
+    print("解析到的模块信息:")
+    print("  模块名: " .. module_info.name)
+    print("  参数数量: " .. #module_info.parameters)
+    print("  端口数量: " .. #module_info.ports)
+    for i, port in ipairs(module_info.ports) do
+      print("    端口" .. i .. ": " .. port.direction .. " " .. port.name)
+    end
   end
   
   -- 生成例化模板

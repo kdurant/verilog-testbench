@@ -18,7 +18,16 @@ M.config = config
 ---@param args Config?
 -- 设置插件配置
 M.setup = function(args)
-  M.config = vim.tbl_deep_extend("force", M.config, args or {})
+  if vim and vim.tbl_deep_extend then
+    M.config = vim.tbl_deep_extend("force", M.config, args or {})
+  else
+    -- 回退方案：简单的表合并
+    if args then
+      for k, v in pairs(args) do
+        M.config[k] = v
+      end
+    end
+  end
 end
 
 -- 生成Verilog例化模板的主函数
